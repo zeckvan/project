@@ -1,0 +1,197 @@
+//課程諮詢
+const tea_consult =
+{
+    header :
+    [
+        {label:'學校代碼',width:'',prop:'a',col:'sch_no',parameter:'N',hidden:'Y',sort:0,defult:''},
+        {label:'學年',width:'50',prop:'b',col:'year_id',parameter:'Y',hidden:'N',sort:1,defult:''},
+        {label:'學期',width:'50',prop:'c',col:'sms_id',parameter:'Y',hidden:'N',sort:2,defult:''},
+        {label:'教師',width:'',prop:'d',col:'emp_id',parameter:'Y',hidden:'Y',sort:0,defult:''},
+        {label:'序號',width:'',prop:'e',col:'ser_id',parameter:'Y',hidden:'Y',sort:0,defult:''},
+        {label:'諮詢日期',width:'',prop:'f',col:'consult_date',parameter:'N',hidden:'N',sort:3,defult:''},
+        {label:'諮詢地點',width:'',prop:'g',col:'consult_area',parameter:'Y',hidden:'N',sort:4,defult:''},
+        {label:'諮詢方式',width:'',prop:'h',col:'consult_type',parameter:'N',hidden:'N',sort:5,defult:''},
+        {label:'諮詢主題',width:'',prop:'i',col:'consult_subject',parameter:'N',hidden:'N',sort:6,defult:''},
+        {label:'諮詢內容',width:'',prop:'j',col:'consult_content',parameter:'Y',hidden:'Y',sort:0,defult:''},
+        {label:'資料來源',width:'',prop:'k',col:'is_sys',parameter:'N',hidden:'Y',sort:0,defult:''},
+    ],
+    sub_header:
+    [
+      {label:'班級',width:'',prop:'a',col:'cls_name',parameter:'N',hidden:'N',sort:1,defult:''},
+      {label:'座號',width:'',prop:'d',col:'sit_num',parameter:'N',hidden:'N',sort:2,defult:''},
+      {label:'學號',width:'',prop:'b',col:'stu_no',parameter:'Y',hidden:'N',sort:3,defult:''},
+      {label:'姓名',width:'',prop:'c',col:'stu_name',parameter:'N',hidden:'N',sort:4,defult:''},
+    ],
+    delete_rule:{},
+    save_rule:{}
+}
+
+//授課教師認證課程學習成果
+const tea_attestation =
+{
+    header:
+    [
+      {label:'學校代碼',width:'',prop:'a',col:'sch_no',parameter:'N',hidden:'Y',sort:0,defult:'',slot:false},
+      {label:'學年',width:'50',prop:'b',col:'year_id',parameter:'Y',hidden:'N',sort:1,defult:'',slot:false},
+      {label:'學期',width:'50',prop:'c',col:'sms_id',parameter:'Y',hidden:'N',sort:2,defult:'',slot:false},
+	    {label:'班級',width:'',prop:'d',col:'cls_id',parameter:'Y',hidden:'Y',sort:0,defult:'',slot:false},
+	    {label:'科目代碼',width:'',prop:'e',col:'sub_id',parameter:'Y',hidden:'Y',sort:0,defult:'',slot:false},
+	    {label:'分組',width:'',prop:'f',col:'src_dup',parameter:'Y',hidden:'Y',sort:0,defult:'',slot:false},
+      {label:'教師代碼',width:'',prop:'g',col:'emp_id',parameter:'Y',hidden:'Y',sort:0,defult:'',slot:false},
+	    {label:'學號',width:'',prop:'h',col:'std_no',parameter:'Y',hidden:'N',sort:5,defult:'',slot:false},
+      {label:'序號',width:'',prop:'i',col:'ser_id',parameter:'Y',hidden:'Y',sort:0,defult:'',slot:false},
+      {label:'學分數',width:'',prop:'j',col:'credit',parameter:'N',hidden:'Y',sort:0,defult:'',slot:false},
+      {label:'修習方式',width:'',prop:'t',col:'scr_study',parameter:'N',hidden:'Y',sort:0,defult:'',slot:false},
+      {label:'送出認證',width:'',prop:'l',col:'attestation_send',parameter:'y',hidden:'Y',sort:0,defult:'',slot:false},
+      {label:'認證日期',width:'',prop:'m',col:'attestation_date',parameter:'N',hidden:'N',sort:7,defult:'',slot:false},
+      {label:'認證狀態',width:'',prop:'n',col:'attestation_status',parameter:'N',hidden:'N',sort:8,defult:'',slot:true},
+      {label:'資料來源',width:'',prop:'o',col:'is_sys',parameter:'N',hidden:'Y',sort:0,defult:'',slot:false},
+      {label:'備註',width:'',prop:'p',col:'content',parameter:'N',hidden:'Y',sort:0,defult:'',slot:false},
+	    {label:'科目名稱',width:'',prop:'q',col:'sub_name',parameter:'N',hidden:'N',sort:4,defult:'',slot:false},
+	    {label:'教師名稱',width:'',prop:'r',col:'emp_name',parameter:'N',hidden:'Y',sort:0,defult:'',slot:false},
+	    {label:'檔案名稱',width:'',prop:'s',col:'file_name',parameter:'N',hidden:'Y',sort:0,defult:'',slot:false},   
+      {label:'上課班級',width:'',prop:'as_cls_name',col:'cls_name',parameter:'N',hidden:'N',sort:3,defult:'',slot:false},   
+      {label:'學生',width:'',prop:'as_name',col:'std_name',parameter:'N',hidden:'N',sort:6,defult:'',slot:false},   
+      {label:'發佈狀態',width:'',prop:'v',col:'attestation_release',parameter:'N',hidden:'N',sort:9,defult:'',slot:true}, 
+      {label:'未通過原因',width:'',prop:'w',col:'attestation_reason',parameter:'N',hidden:'N',sort:10,defult:'',slot:true}, 
+    ],
+    delete_rule:{},
+    save_rule:{},
+    query_data:false,
+    delete_data:false,
+    upload_file:true,
+    download_file:true,    
+    add_data:false,
+    checkbox:true,
+}
+
+const tea_attestation_query =
+{
+    header:
+    [
+		{label:'學校代碼',width:'',prop:'a',col:'sch_no',parameter:'N',hidden:'Y',sort:0,defult:'',slot:false},
+		{label:'學年',width:'50',prop:'b',col:'year_id',parameter:'Y',hidden:'N',sort:1,defult:'',slot:false},
+		{label:'學期',width:'50',prop:'c',col:'sms_id',parameter:'Y',hidden:'N',sort:2,defult:'',slot:false},
+		{label:'科目名稱',width:'',prop:'as_subj_name',col:'as_subj_name',parameter:'N',hidden:'N',sort:3,defult:'',slot:false},
+		{label:'上課班級',width:'',prop:'as_cls_name',col:'as_cls_name',parameter:'N',hidden:'N',sort:4,defult:'',slot:false},
+    {label:'座號',width:'',prop:'as_sit_num',col:'as_sit_num',parameter:'N',hidden:'N',sort:5,defult:'',slot:false},
+    {label:'學生學號',width:'',prop:'as_std_no',col:'as_std_no',parameter:'N',hidden:'N',sort:6,defult:'',slot:false},
+		{label:'學生姓名',width:'',prop:'as_name',col:'as_name',parameter:'N',hidden:'N',sort:7,defult:'',slot:false},
+		{label:'已上傳數量',width:'',prop:'x_fileupload',col:'x_fileupload',parameter:'N',hidden:'N',sort:8,defult:'',slot:false},
+		{label:'已認證通過',width:'',prop:'x_pass',col:'x_pass',parameter:'N',hidden:'N',sort:9,defult:'',slot:true},
+		{label:'尚未認證數',width:'',prop:'x_notyet',col:'x_notyet',parameter:'N',hidden:'N',sort:10,defult:'',slot:false},
+    ],
+    delete_rule:{},
+    save_rule:{},
+    query_data:false,
+    delete_data:false,
+    upload_file:true,
+    download_file:true,    
+    add_data:false,
+    checkbox:true,
+}
+
+const tea_tutor =
+{
+    header:
+    [
+		{label:'學校代碼',width:'',prop:'sch_no',col:'sch_no',parameter:'N',hidden:'Y',sort:0,defult:'',slot:false},
+		{label:'學年',width:'50',prop:'b',col:'year_id',parameter:'N',hidden:'N',sort:1,defult:'',slot:false},
+		{label:'學期',width:'50',prop:'c',col:'sms_id',parameter:'N',hidden:'N',sort:2,defult:'',slot:false},
+		{label:'班級',width:'',prop:'as_cls_name',col:'cls_id',parameter:'N',hidden:'N',sort:3,defult:'',slot:false},
+		{label:'學號',width:'',prop:'as_std_no',col:'std_no',parameter:'N',hidden:'N',sort:4,defult:'',slot:false},
+    {label:'姓名',width:'',prop:'as_name',col:'std_name',parameter:'N',hidden:'N',sort:5,defult:'',slot:false},
+		{label:'學習成果紀錄',width:'',prop:'x_1',col:'x_1',parameter:'N',hidden:'N',sort:6,defult:'',slot:false},
+		{label:'學習成果認證',width:'',prop:'x_2',col:'x_2',parameter:'N',hidden:'N',sort:7,defult:'',slot:false},
+		{label:'學習成果勾選',width:'',prop:'x_3',col:'x_3',parameter:'N',hidden:'N',sort:8,defult:'',slot:true},
+		{label:'多元表現紀錄',width:'',prop:'x_4',col:'x_4',parameter:'N',hidden:'N',sort:9,defult:'',slot:false},
+    {label:'多元表現勾選',width:'',prop:'x_5',col:'x_5',parameter:'N',hidden:'N',sort:10,defult:'',slot:false},
+    ],
+    delete_rule:{},
+    save_rule:{},
+    query_data:false,
+    delete_data:false,
+    upload_file:true,
+    download_file:true,    
+    add_data:false,
+    checkbox:true,
+}
+
+const learning_result =
+{
+    header:
+    [
+		{label:'學校代碼',width:'',prop:'sch_no',col:'sch_no',parameter:'N',hidden:'Y',sort:0,defult:'',slot:false},
+		{label:'學年',width:'50',prop:'year_id',col:'year_id',parameter:'N',hidden:'N',sort:1,defult:'',slot:false},
+		{label:'學期',width:'50',prop:'sms_id',col:'sms_id',parameter:'N',hidden:'N',sort:2,defult:'',slot:false},
+		{label:'班級',width:'',prop:'cls_abr',col:'cls_abr',parameter:'N',hidden:'N',sort:3,defult:'',slot:false},
+		{label:'學號',width:'',prop:'std_no',col:'std_no',parameter:'N',hidden:'N',sort:4,defult:'',slot:false},
+    {label:'姓名',width:'',prop:'std_name',col:'std_name',parameter:'N',hidden:'N',sort:5,defult:'',slot:false},
+		{label:'學習成果勾選數量',width:'',prop:'x_cnt',col:'x_cnt',parameter:'N',hidden:'N',sort:6,defult:'',slot:false},
+    ],
+    delete_rule:{},
+    save_rule:{},
+    query_data:false,
+    delete_data:false,
+    upload_file:true,
+    download_file:true,    
+    add_data:false,
+    checkbox:true,
+}
+
+const multiple_learning  =
+{
+    header:
+    [
+		{label:'學校代碼',width:'',prop:'sch_no',col:'sch_no',parameter:'N',hidden:'Y',sort:0,defult:'',slot:false},
+		{label:'學年',width:'50',prop:'year_id',col:'year_id',parameter:'N',hidden:'N',sort:1,defult:'',slot:false},
+		{label:'學期',width:'50',prop:'sms_id',col:'sms_id',parameter:'N',hidden:'N',sort:2,defult:'',slot:false},
+		{label:'班級',width:'',prop:'cls_abr',col:'cls_abr',parameter:'N',hidden:'N',sort:3,defult:'',slot:false},
+		{label:'學號',width:'',prop:'std_no',col:'std_no',parameter:'N',hidden:'N',sort:4,defult:'',slot:false},
+    {label:'姓名',width:'',prop:'std_name',col:'std_name',parameter:'N',hidden:'N',sort:5,defult:'',slot:false},
+		{label:'多元學習勾選數量',width:'',prop:'x_cnt',col:'x_cnt',parameter:'N',hidden:'N',sort:6,defult:'',slot:false},
+    ],
+    delete_rule:{},
+    save_rule:{},
+    query_data:false,
+    delete_data:false,
+    upload_file:true,
+    download_file:true,    
+    add_data:false,
+    checkbox:true,
+}
+
+const attestation_notyet  =
+{
+    LeftHeader:
+    [
+		{label:'學年',width:'50',prop:'year_id',col:'year_id',parameter:'Y',hidden:'Y',sort:0,defult:'',slot:false},
+		{label:'學期',width:'50',prop:'sms_id',col:'sms_id',parameter:'Y',hidden:'Y',sort:0,defult:'',slot:false},
+    {label:'教師姓名',width:'',prop:'emp_name',col:'emp_name',parameter:'N',hidden:'N',sort:1,defult:'',slot:false},
+		{label:'教師代碼',width:'',prop:'emp_id',col:'emp_id',parameter:'Y',hidden:'Y',sort:0,defult:'',slot:false},
+		{label:'未認證數量',width:'',prop:'x_cnt',col:'x_cnt',parameter:'N',hidden:'N',sort:2,defult:'',slot:false},
+    ],
+    RightHeader:
+    [
+      {label:'學年',width:'50',prop:'year_id',col:'year_id',parameter:'Y',hidden:'N',sort:1,defult:'',slot:false},
+      {label:'學期',width:'50',prop:'sms_id',col:'sms_id',parameter:'Y',hidden:'N',sort:2,defult:'',slot:false},
+      {label:'班級',width:'',prop:'cls_abr',col:'cls_abr',parameter:'N',hidden:'N',sort:3,defult:'',slot:false},
+      {label:'學號',width:'',prop:'std_no',col:'std_no',parameter:'Y',hidden:'N',sort:4,defult:'',slot:false},
+      {label:'姓名',width:'',prop:'std_name',col:'std_name',parameter:'N',hidden:'N',sort:5,defult:'',slot:false},
+      {label:'科目',width:'',prop:'sub_name',col:'sub_name',parameter:'N',hidden:'N',sort:6,defult:'',slot:false},
+      {label:'待認證數量',width:'',prop:'x_cnt',col:'x_cnt',parameter:'N',hidden:'N',sort:7,defult:'',slot:false},
+    ],    
+    delete_rule:{},
+    save_rule:{},
+    query_data:false,
+    delete_data:false,
+    upload_file:true,
+    download_file:true,    
+    add_data:false,
+    checkbox:true,
+}
+
+export
+{
+  tea_consult,tea_attestation,tea_attestation_query,tea_tutor,multiple_learning,learning_result,attestation_notyet
+}
