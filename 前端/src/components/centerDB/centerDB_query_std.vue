@@ -248,6 +248,7 @@ export default {
     //共用
     postStdList() {
       const _self = this
+      let type_id = ''
 
       if(_self.std==""){
         _self.$message.error('請選擇學生！')
@@ -258,9 +259,11 @@ export default {
 
       if(_self.$props.urlObject != undefined){
         apiurl = `${_self.$apiroot}${_self.$props.urlObject.QueryStd}`
+        type_id = '1'
       }
       else if(_self.$props.std_urlObject != undefined){
         apiurl = `${_self.$apiroot}${_self.$props.std_urlObject.QueryStd}`
+        type_id = '2'
       }
 
       const loading = _self.$loading({
@@ -275,6 +278,7 @@ export default {
       formData.append("sms", _self.sms)
       formData.append("std", _self.std)
       formData.append("token", _self.$token)
+      formData.append("type", type_id)
       this.axios({
           method: 'post',
           url: apiurl,

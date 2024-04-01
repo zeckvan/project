@@ -33,7 +33,7 @@
             </el-form-item>
         </el-form>
     </div>
-    <el-tabs v-model="activeName" @tab-click="handleClick">
+    <el-tabs v-model="activeName" @tab-click="handleClick">     
         <el-tab-pane label="學習成果概況統計" name="first">
           <LearningResult 
             :userStatic="userStatic" 
@@ -60,6 +60,8 @@
   var apiurl = ''
   import LearningResult from '@/components/admin/MultipleLearning.vue'
   import TeaTutorDetail from '@/components/teacher/tea_tutor_detail.vue' 
+  import * as adminAPI from  '@/apis/adminApi.js' 
+  import * as teaAPI from  '@/apis/teaApi.js' 
   export default {
     name: 'AdmintTutorView',
     props: {
@@ -86,7 +88,7 @@
                               consult_emp:"",
                               kind:this.userStatic.interface,
                               sRowNun:1,
-                              eRowNun:10,token:this.$token},
+                              eRowNun:10,token:this.$token,arg_std:''},
                       yearlist:[],
                       smslist:[],
                       clslist:[],
@@ -116,56 +118,37 @@
     },
     methods: {
       getstd:function(val){
-        this.queryform.std_no = val
-        this.page2Lable = `學習成果及多元表現概況明細(學號：${val})`
+        this.queryform.arg_std = val
+        this.page2Lable = `多元表現概況明細(學號：${val})`
       },
       yearChange:function(val){
           this.clsParms.year_id = val     
-          //this.getclslist(this.clsParms)
       },
       smsChange:function(val){
           this.clsParms.sms_id = val
-          //this.getclslist(this.clsParms)
       },
       query:function(){     
+        this.page2Lable = `多元表現概況明細(學號：)`
         this.get_data()
       },   
-      get_data:function(){
+      get_data:async function(){
         let _self = this
-        const loading = _self.$loading({
-        lock: true,
-        text: '資料讀取中，請稍後。',
-        spinner: 'el-icon-loading',
-        background: 'rgba(0, 0, 0, 0.7)'
-      });
-      apiurl = _self.api_interface.get_data
 
-      _self.$http({
-        url: apiurl,
-        method: 'get',
-        params: _self.queryform,
-        headers:{'SkyGet':_self.$token}
-      })
-        .then((res) => {  
-          if (res.data.status == 'Y') {     
-            _self.tableData = res.data.dataset   
-            _self.total = res.data.dataset[0].x_total
-            console.log(_self.total )
+        const { data, statusText } = await teaAPI.TeaAttestation.MultipleLearning.Get(_self.queryform) 
+
+        if (statusText !== "OK") {
+          throw new Error(statusText);
+        }
+
+        if (data.status == 'Y') {     
+            _self.tableData = data.dataset   
+            _self.total = data.dataset[0].x_total
+            _self.queryform.arg_std = ''
+            _self.page2Lable = `多元表現概況明細(學號：)`
           } else {
             _self.tableData = []
             _self.$message.error('查無資料，請確認')
           }
-        })
-        .catch((error) => {
-            _self.tableData = []
-            _self.$message({
-              message: '系統發生錯誤'+error,
-              type: 'error',
-              duration:0,
-              showClose: true,
-            })
-          })
-        .finally(() => loading.close())        
       }, 
       handleClick:function(tab, event){
           this.activePage = tab.index
@@ -174,61 +157,43 @@
         this.cleanlist = []
         this.activeName = 'second'
       },
-      getyearlist:function(){
+      getyearlist:async function(){
           let _self = this
-          const apiurl = `${_self.$apiroot}/s90yearinfo`   
-          return new Promise(function(resolve, reject){
-                              _self.$http({
-                                      url:apiurl,
-                                      method:'get',
-                                      headers:{'SkyGet':_self.$token}
-                                      })
-                                      .then((res)=>{        
-                                            if(res.data.status == 'Y'){
-                                              _self.yearlist = res.data.dataset
-                                              _self.queryform.year_id = res.data.dataset[0].year_id.toString()
-                                              _self.clsParms.year_id = res.data.dataset[0].year_id.toString()
-                                            }else{
-                                              _self.queryform.year_id = ""
-                                              _self.yearlist = []
-                                            }  
-                                            resolve('Y')
-                                        })         
-                                      .catch((error)=>{
-                                                _self.$message.error('呼叫後端【s90yearinfo】發生錯誤,'+error)
-                                                reject('N')
-                                              })
-                                      .finally()                             
-                            });      
-        },
-        getsmslist:function(){
-          let _self = this    
-          const apiurl = `${_self.$apiroot}/s90smsinfo`      
-          return new Promise(function(resolve, reject){
-                    _self.$http({
-                    url:apiurl,
-                    method:'get',
-                    headers:{'SkyGet':_self.$token}
-                    })
-                    .then((res)=>{
-                        if(res.data.status == 'Y'){
-                          _self.smslist = res.data.dataset
-                          _self.queryform.sms_id = res.data.dataset[0].sms_id.toString()
-                          _self.clsParms.sms_id = res.data.dataset[0].sms_id.toString()
-                        }else{
-                          _self.queryform.sms_id = ""
-                          _self.smslist = []
-                        }  
-                        resolve('Y')                                                     
-                      })         
-                    .catch((error)=>{
-                              _self.$message.error('呼叫後端【s90smsinfo】發生錯誤,'+error)
-                              reject('N')
-                            })
-                    .finally()  
-          })      
-        },
-        getclslist:function(arg){
+
+          const { data, statusText } = await adminAPI.s90yearinfo.Get() 
+
+          if (statusText !== "OK") {
+            throw new Error(statusText);
+          }
+
+          if(data.status == 'Y'){
+            _self.yearlist = data.dataset
+            _self.queryform.year_id = data.dataset[0].year_id.toString()
+            _self.clsParms.year_id = data.dataset[0].year_id.toString()
+          }else{
+            queryform.year_id = ""
+            yearlist = []
+          } 
+      },
+      getsmslist:async function(){
+          let _self = this
+
+          const { data, statusText } = await adminAPI.s90smsinfo.Get() 
+
+          if (statusText !== "OK") {
+            throw new Error(statusText);
+          }
+
+          if(data.status == 'Y'){
+            _self.smslist = data.dataset
+            _self.queryform.sms_id = data.dataset[0].sms_id.toString()
+            _self.clsParms.sms_id = data.dataset[0].sms_id.toString()
+          }else{
+            _self.queryform.sms_id = ""
+            _self.smslist = []
+          }  
+      },
+      getclslist:function(arg){
           let _self = this    
           const apiurl = `${_self.$apiroot}/TeaAttestation/clslist`      
           return new Promise(function(resolve, reject){
@@ -257,9 +222,21 @@
                     .finally()        
           }) 
       },
-      asyncRun:async function(){
-        await this.getyearlist()
-        await this.getsmslist()
+      asyncRun:async function(){      
+        const promises = [
+            this.getyearlist(),
+            this.getsmslist()
+        ];
+
+        await Promise.allSettled(promises)
+        /*
+        await Promise.allSettled(promises).then(values => {
+         console.log(values)
+        });           
+         */
+           
+        //await this.getyearlist()
+        //await this.getsmslist()
         //await this.getclslist(this.clsParms)
       },                   
     },

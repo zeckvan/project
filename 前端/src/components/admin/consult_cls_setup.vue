@@ -3,17 +3,17 @@
     <el-container style="height:100%; border: 1px solid #eee">
       <el-main style="border: 1px solid #eee;width: 17%;">
         <consult_tea :userStatic="userStatic" :api_interface="api_interface" v-on:get-empdata="getempdata"/>
-      </el-main>     
+      </el-main>          
       <el-main style="border: 1px solid #eee;width: 14%;">
         <consult_cls 
                     :userStatic="userStatic" 
                     :api_interface="api_interface" 
                     :getempid="getempid" 
                     v-on:get-insertStatus="getinsertStatus"/>
-      </el-main>    
+      </el-main>  
       <el-main style="border: 1px solid #eee;width: 29%;">
         <consult_list :userStatic="userStatic" :api_interface="api_interface" :getAddStatus="getAddStatus"/>
-      </el-main>          
+      </el-main>     
     </el-container>
   </div>
 </template>

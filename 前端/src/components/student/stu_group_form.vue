@@ -232,7 +232,6 @@
                         this.form.year_id = val
                     },
                     getsms:function(val){
-                        //console.log(val)
                          this.form.sms_id = val
                     },
                     enddate_chk_range:function(){

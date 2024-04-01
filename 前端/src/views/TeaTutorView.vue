@@ -130,6 +130,7 @@
           this.getclslist(this.clsParms)
       },
       query:function(){     
+        this.page2Lable = `學習成果及多元表現概況明細`
         this.get_data()
       },   
       get_data:function(){

@@ -41,7 +41,7 @@
           <el-submenu index="5">
               <template slot="title">中央資料庫</template>
               <el-menu-item index="5-1" route="centerDB-stdquery">查詢提交記錄</el-menu-item>
-              <el-menu-item index="5-2" route="centerDB-stdfeedback">問題回報</el-menu-item>
+              <el-menu-item index="5-2" route="centerDB-stdfeedback">中央資料庫（學生）-問題回報</el-menu-item>
           </el-submenu>      
           <el-submenu index="6">
               <template slot="title">授課教師</template>
@@ -103,7 +103,6 @@
       },
       methods: {
           handleSelect:function(key, keyPath){
-                     // console.log(key,keyPath)
                      this.content = key
                      this.isShow = true
                   }

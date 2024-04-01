@@ -197,11 +197,9 @@ export default {
             this.$emit('get-show', false)
         },
         getyear: function (val) {
-            //console.log(val)
             this.form.year_id = val
         },
         getsms: function (val) {
-            //console.log(val)
             this.form.sms_id = val
         },
         checkWeeks(){

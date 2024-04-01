@@ -48,7 +48,7 @@ const Operate_SetUp =
 {
   header:
   [  
-    {label:'學年',width:'100',prop:'year_id',col:'year_id',parameter:'Y',hidden:'N',sort:1,defult:'',align:"left",slot:false,type:"input",index:"N"},
+    {label:'學年',width:'100',prop:'year_id',col:'year_id',parameter:'Y',hidden:'Y',sort:1,defult:'',align:"left",slot:false,type:"input",index:"N"},
     {label:'學期',width:'100',prop:'sms_id',col:'sms_id',parameter:'Y',hidden:'N',sort:2,defult:'',align:"center",slot:false,type:"input",index:"N"},
     {label:'項目',width:'',prop:'type_id',col:'type_id',parameter:'Y',hidden:'N',sort:3,defult:'',align:"center",slot:true,type:"select",index:"N"},
     {label:'開放日期',width:'',prop:'startdate',col:'startdate',parameter:'Y',hidden:'N',sort:4,defult:'',align:"center",slot:true,type:"date",index:"N"},

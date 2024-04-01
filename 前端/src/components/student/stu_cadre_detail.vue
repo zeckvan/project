@@ -112,7 +112,7 @@
           'v-pubquery': PubQuery        
       },
       mounted: function () {
-        console.log('zecktest',this.$router);
+
       },
     }
   </script>

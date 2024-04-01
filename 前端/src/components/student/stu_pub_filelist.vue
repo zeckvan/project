@@ -73,6 +73,7 @@
 
 <script>
 import { watch } from 'vue';
+import * as fileAPI from  '@/apis/fileApi.js' 
     var g_file_cnt = 0
     var g_select = 0
     export default {
@@ -195,79 +196,59 @@ import { watch } from 'vue';
                 getshow:function(val){
                     this.isShow = val.show;
                 },
-                file_delete:function(val){
-                    let _self = this
-                    let apiurl = ''
-                    const loading = _self.$loading({
-                                lock: true,
-                                text: '資料處理中，請稍後。',
-                                spinner: 'el-icon-loading',
-                                background: 'rgba(0, 0, 0, 0.7)'
-                                });
-                    _self.parameter.number_id = val.row.number_id
+                file_delete:async function(val){
+                    try {
+                        const confirm =  await this.$confirm(`確定刪除?`, 'Warning', {
+                                                             confirmButtonText: '確定',
+                                                             cancelButtonText: '取消',
+                                                             type: 'warning'
+                                                            }).catch(()=>{})
 
-                    apiurl = _self.api_interface.file_download
-                    _self.$confirm(`確定刪除?`, 'Warning', {
-                        confirmButtonText: '確定',
-                        cancelButtonText: '取消',
-                        type: 'warning'
-                    }).then(() => {
-                        _self.$http({
-                                url:apiurl,
-                                method:'delete',
-                                data:_self.parameter,
-                                responseType: 'blob',
-                                headers:{'SkyGet':_self.$token}
-                                })
-                                .then((res)=>{
-                                            if (res.statusText == 'OK' || res.status == '200'){
-                                                _self.$message.success('檔案刪除成功!!')
-                                                _self.filelist.splice(val.$index, 1);
-                                            }else{
-                                                _self.$message.error('檔案刪除發生錯誤!!')
-                                            }
-                                        })
-                                .catch((error)=>{
-                                        _self.$message.error('檔案刪除發生錯誤:'+error)
-                                        })
-                                .finally(()=>loading.close())
-                    }).catch(() => {
-                    }).finally(()=>loading.close())
-                },
-                file_download:function(val){
-                    let _self = this
-                    let apiurl = ''
-                    const loading = _self.$loading({
-                                lock: true,
-                                text: '資料處理中，請稍後。',
-                                spinner: 'el-icon-loading',
-                                background: 'rgba(0, 0, 0, 0.7)'
-                                });
+                        if(confirm !== 'confirm')
+                        {
+                            return  this.$message.info('已取消刪除!!')
+                        }
 
-                    _self.parameter.number_id = val.row.number_id
-                    apiurl = _self.api_interface.file_download
-                    _self.$http({
-                                url:apiurl,
-                                method:'get',
-                                params:_self.parameter,
-                                responseType: 'blob',
-                                headers:{'SkyGet':_self.$token}
-                                })
-                                .then((res)=>{
-                                        _self.download(res,val)
-                                        })
-                                .catch((error)=>{
-                                        _self.$message.error('檔案下載發生錯誤:'+error)
-                                        })
-                                .finally(()=>loading.close())
+                        this.parameter.number_id = val.row.number_id                        
+
+                        const { data, statusText } = await fileAPI.StuFileInfo.file_delete(this.parameter) 
+
+                        if (statusText !== "OK") {
+                            throw new Error(statusText);
+                        }
+
+                        if (statusText == 'OK'){
+                            this.$message.success('檔案刪除成功!!')
+                            this.filelist.splice(val.$index, 1);
+                        }else{
+                            this.$message.error('檔案刪除發生錯誤!!')
+                        }
+
+                    } catch (error) {
+                        this.$message.error('檔案刪除發生錯誤:'+error)
+                    }
                 },
-                download:function(res,val){
+                file_download:async function(val){
+                    try {
+                        this.parameter.number_id = val.row.number_id
+
+                        const { data, statusText } = await fileAPI.StuFileInfo.file_download(this.parameter) 
+
+                        if (statusText !== "OK") {
+                            throw new Error(statusText);
+                        }
+                        this.download(data, statusText ,val)
+                    } catch (error) {
+                        this.$message.error('檔案下載發生錯誤:'+error)
+                    }
+                },
+                download:function(data, statusText ,val){
                     let _self = this
-                    let context = res.data
+                    let context = data
                     let blob = new Blob([context])
                     let filename = val.row.file_name+'.'+val.row.file_extension
                     if("download" in document.createElement("a")){
-                        if (res.statusText == 'OK' || res.status == '200'){
+                        if (statusText == 'OK'){
                                 let link = document.createElement("a")
                                 link.download = filename
                                 link.style.displya = "none"
@@ -298,7 +279,7 @@ import { watch } from 'vue';
                
             },
             beforeMount() {
-                //console.log(this.filelist)
+
             },
             watch:{
                 fileList:function(val1,val2){

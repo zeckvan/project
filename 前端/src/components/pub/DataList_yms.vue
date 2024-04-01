@@ -6,6 +6,7 @@
 </template>
     
 <script>
+  import * as adminAPI from  '@/apis/adminApi.js' 
   export default {
     name: "yms",
     props: {
@@ -24,7 +25,7 @@
             this.$emit('get-year', this.year)
         }
     },
-    mounted() {
+    async mounted() {
         let _self = this
 
         const apiurl = `${_self.$apiroot}/s90ymsinfo/All`

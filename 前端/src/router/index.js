@@ -2,8 +2,11 @@ import Vue from "vue"
 import VueRouter from "vue-router"
 import StuBasicView from "../views/StuBasicView.vue"
 import IndexView from "../views/IndexView.vue"
+import * as stuAPI from  '@/apis/stuApi.js'
 
-Vue.prototype.$apiroot = window.apiConfig.api
+
+//Vue.prototype.$apiroot = window.apiConfig.api
+/**
 let cookieObj = {};
 let cookieAry = document.cookie.split(';');
 let cookie;
@@ -18,7 +21,9 @@ function parseCookie() {
 }
 
 Vue.prototype.$token = cookieObj[' X-Token']
-//Vue.prototype.$token = '5bdcecc'
+Vue.prototype.$token = '97814c3b'
+ */
+
 Vue.use(VueRouter)
 
 const routes = [
@@ -57,19 +62,20 @@ const routes = [
       },
       api_interface:
       {
-        /*
-        file_download: `${Vue.prototype.$apiroot}/StudCadre/file`,
-        file_data: `${Vue.prototype.$apiroot}/StudCadre/files`,
-        file_upload: `${Vue.prototype.$apiroot}/StudCadre/file`,
-        */
         file_download:`${Vue.prototype.$apiroot}/StuFileInfo/file`,
-        file_data:`${Vue.prototype.$apiroot}/StuFileInfo/files`,
-        file_upload:`${Vue.prototype.$apiroot}/StuFileInfo/file`,        
-        del_data: `${Vue.prototype.$apiroot}/StudCadre`,
-        get_data: `${Vue.prototype.$apiroot}/StudCadre/list`,
+        file_upload:`${Vue.prototype.$apiroot}/StuFileInfo/file`,
         get_form: `${Vue.prototype.$apiroot}/StudCadre`,
         save_form: `${Vue.prototype.$apiroot}/StudCadre`,
-        save_centraldb:`${Vue.prototype.$apiroot}/StudCadre/centraldb`,
+        //save_centraldb:`${Vue.prototype.$apiroot}/StudCadre/centraldb`,
+        save_centraldb:(formdata)=>{
+          return stuAPI.StudCadre.save_centraldb(formdata)
+        },
+        get_data:(parameter)=>{
+          return stuAPI.StudCadre.GetList(parameter)
+        },
+        del_data:(formdata)=>{
+          return stuAPI.StudCadre.Delete(formdata)
+        }
       }
     }
   },
@@ -94,12 +100,15 @@ const routes = [
         */
         file_download:`${Vue.prototype.$apiroot}/StuFileInfo/file`,
         file_data:`${Vue.prototype.$apiroot}/StuFileInfo/files`,
-        file_upload:`${Vue.prototype.$apiroot}/StuFileInfo/file`,         
+        file_upload:`${Vue.prototype.$apiroot}/StuFileInfo/file`,
         del_data: `${Vue.prototype.$apiroot}/StuStudyf`,
-        get_data: `${Vue.prototype.$apiroot}/StuStudyf/list`,
+        //get_data: `${Vue.prototype.$apiroot}/StuStudyf/list`,
         get_form: `${Vue.prototype.$apiroot}/StuStudyf`,
         save_form: `${Vue.prototype.$apiroot}/StuStudyf`,
         save_centraldb:`${Vue.prototype.$apiroot}/StuStudyf/centraldb`,
+        get_data:(parameter)=>{
+          return stuAPI.StuStudyf.GetList(parameter)
+        },
       }
     }
   },
@@ -121,10 +130,13 @@ const routes = [
         file_data:`${Vue.prototype.$apiroot}/StuFileInfo/files`,
         file_upload:`${Vue.prototype.$apiroot}/StuFileInfo/file`,
         del_data:`${Vue.prototype.$apiroot}/StuGroup`,
-        get_data:`${Vue.prototype.$apiroot}/StuGroup/list`,
+        //get_data:`${Vue.prototype.$apiroot}/StuGroup/list`,
         get_form:`${Vue.prototype.$apiroot}/StuGroup`,
         save_form:`${Vue.prototype.$apiroot}/StuGroup`,
         save_centraldb:`${Vue.prototype.$apiroot}/StuGroup/centraldb`,
+        get_data:(parameter)=>{
+          return stuAPI.StuGroup.GetList(parameter)
+        },
       }
     }
   },
@@ -146,10 +158,13 @@ const routes = [
         file_data:`${Vue.prototype.$apiroot}/StuFileInfo/files`,
         file_upload:`${Vue.prototype.$apiroot}/StuFileInfo/file`,
         del_data:`${Vue.prototype.$apiroot}/StuCollege`,
-        get_data:`${Vue.prototype.$apiroot}/StuCollege/list`,
+        //get_data:`${Vue.prototype.$apiroot}/StuCollege/list`,
         get_form:`${Vue.prototype.$apiroot}/StuCollege`,
         save_form:`${Vue.prototype.$apiroot}/StuCollege`,
         save_centraldb:`${Vue.prototype.$apiroot}/StuCollege/centraldb`,
+        get_data:(parameter)=>{
+          return stuAPI.StuCollege.GetList(parameter)
+        },
       }
     }
   },
@@ -171,10 +186,13 @@ const routes = [
         file_data:`${Vue.prototype.$apiroot}/StuFileInfo/files`,
         file_upload:`${Vue.prototype.$apiroot}/StuFileInfo/file`,
         del_data:`${Vue.prototype.$apiroot}/StuWorkPlace`,
-        get_data:`${Vue.prototype.$apiroot}/StuWorkPlace/list`,
+        //get_data:`${Vue.prototype.$apiroot}/StuWorkPlace/list`,
         get_form:`${Vue.prototype.$apiroot}/StuWorkPlace`,
         save_form:`${Vue.prototype.$apiroot}/StuWorkPlace`,
         save_centraldb:`${Vue.prototype.$apiroot}/StuWorkPlace/centraldb`,
+        get_data:(parameter)=>{
+          return stuAPI.StuWorkPlace.GetList(parameter)
+        },
       }
     }
   },
@@ -196,10 +214,13 @@ const routes = [
         file_data:`${Vue.prototype.$apiroot}/StuFileInfo/files`,
         file_upload:`${Vue.prototype.$apiroot}/StuFileInfo/file`,
         del_data:`${Vue.prototype.$apiroot}/StuOther`,
-        get_data:`${Vue.prototype.$apiroot}/StuOther/list`,
+        //get_data:`${Vue.prototype.$apiroot}/StuOther/list`,
         get_form:`${Vue.prototype.$apiroot}/StuOther`,
         save_form:`${Vue.prototype.$apiroot}/StuOther`,
         save_centraldb:`${Vue.prototype.$apiroot}/StuOther/centraldb`,
+        get_data:(parameter)=>{
+          return stuAPI.StuOther.GetList(parameter)
+        },
       }
     }
   },
@@ -221,10 +242,13 @@ const routes = [
         file_data:`${Vue.prototype.$apiroot}/StuFileInfo/files`,
         file_upload:`${Vue.prototype.$apiroot}/StuFileInfo/file`,
         del_data:`${Vue.prototype.$apiroot}/StuResult`,
-        get_data:`${Vue.prototype.$apiroot}/StuResult/list`,
+        //get_data:`${Vue.prototype.$apiroot}/StuResult/list`,
         get_form:`${Vue.prototype.$apiroot}/StuResult`,
         save_form:`${Vue.prototype.$apiroot}/StuResult`,
         save_centraldb:`${Vue.prototype.$apiroot}/StuResult/centraldb`,
+        get_data:(parameter)=>{
+          return stuAPI.StuResult.GetList(parameter)
+        },
       }
     }
   },
@@ -246,10 +270,13 @@ const routes = [
         file_data:`${Vue.prototype.$apiroot}/StuFileInfo/files`,
         file_upload:`${Vue.prototype.$apiroot}/StuFileInfo/file`,
         del_data:`${Vue.prototype.$apiroot}/StuVolunteer`,
-        get_data:`${Vue.prototype.$apiroot}/StuVolunteer/list`,
+        //get_data:`${Vue.prototype.$apiroot}/StuVolunteer/list`,
         get_form:`${Vue.prototype.$apiroot}/StuVolunteer`,
         save_form:`${Vue.prototype.$apiroot}/StuVolunteer`,
         save_centraldb:`${Vue.prototype.$apiroot}/StuVolunteer/centraldb`,
+        get_data:(parameter)=>{
+          return stuAPI.StuVolunteer.GetList(parameter)
+        },
       }
     }
   },
@@ -271,10 +298,13 @@ const routes = [
         file_data:`${Vue.prototype.$apiroot}/StuFileInfo/files`,
         file_upload:`${Vue.prototype.$apiroot}/StuFileInfo/file`,
         del_data:`${Vue.prototype.$apiroot}/StuLicense`,
-        get_data:`${Vue.prototype.$apiroot}/StuLicense/list`,
+        //get_data:`${Vue.prototype.$apiroot}/StuLicense/list`,
         get_form:`${Vue.prototype.$apiroot}/StuLicense`,
         save_form:`${Vue.prototype.$apiroot}/StuLicense`,
         save_centraldb:`${Vue.prototype.$apiroot}/StuLicense/centraldb`,
+        get_data:(parameter)=>{
+          return stuAPI.StuLicense.GetList(parameter)
+        },
       }
     }
   },
@@ -293,13 +323,16 @@ const routes = [
       api_interface:
       {
         file_download:`${Vue.prototype.$apiroot}/StuFileInfo/file`,
-        file_data:`${Vue.prototype.$apiroot}/StuFileInfo/files`,
         file_upload:`${Vue.prototype.$apiroot}/StuFileInfo/file`,
         del_data:`${Vue.prototype.$apiroot}/StuCompetition`,
-        get_data:`${Vue.prototype.$apiroot}/StuCompetition/list`,
         get_form:`${Vue.prototype.$apiroot}/StuCompetition`,
         save_form:`${Vue.prototype.$apiroot}/StuCompetition`,
-        save_centraldb:`${Vue.prototype.$apiroot}/StuCompetition/centraldb`,
+        get_data:(parameter)=>{
+          return stuAPI.StuCompetition.GetList(parameter)
+        },
+        save_centraldb:(formdata)=>{
+          return stuAPI.StuCompetition.save_centraldb(formdata)
+        },
       }
     }
   },
@@ -372,11 +405,14 @@ const routes = [
         file_download:`${Vue.prototype.$apiroot}/StuFileInfo/file`,
         file_data:`${Vue.prototype.$apiroot}/StuFileInfo/files`,
         file_upload:`${Vue.prototype.$apiroot}/StuFileInfo/file`,
-        get_data:`${Vue.prototype.$apiroot}/StuConsult/list`,
+        //get_data:`${Vue.prototype.$apiroot}/StuConsult/list`,
         get_form:`${Vue.prototype.$apiroot}/StuConsult`,
+        get_data:(parameter)=>{
+          return stuAPI.StuConsult.GetList(parameter)
+        }
       }
     }
-  },    
+  },
   {
     path: "/stuattestation",//上傳課程學習成果
     name: "stuattestation",
@@ -401,9 +437,12 @@ const routes = [
         get_form:`${Vue.prototype.$apiroot}/StuAttestation`,
         save_form:`${Vue.prototype.$apiroot}/StuAttestation`,
         get_OpOpenYN:`${Vue.prototype.$apiroot}/Get_L01_operate_open`,
+        get_data:(parameter)=>{
+          return stuAPI.stu_attestation.GetList(parameter)
+        }
       }
     }
-  },    
+  },
   {
     path: "/stuattestationconfirm",//確認課程學習成果
     name: "stuattestationconfirm",
@@ -429,7 +468,7 @@ const routes = [
         save_form:`${Vue.prototype.$apiroot}/StuAttestation/confirm`,
       }
     }
-  },    
+  },
   {
     path: "/stuattestationcentraldb",//確認課程學習成果
     name: "stuattestationcentraldb",
@@ -514,11 +553,11 @@ const routes = [
         get_form:`${Vue.prototype.$apiroot}/TeaAttestation`,
         save_Verify:`${Vue.prototype.$apiroot}/TeaAttestation/confirm`,
         save_Release:`${Vue.prototype.$apiroot}/TeaAttestation/confirmRelease`,
-        save_Reason:`${Vue.prototype.$apiroot}/TeaAttestation/confirmReason`, 
-        get_OpOpenYN:`${Vue.prototype.$apiroot}/Get_L01_operate_open`,       
+        save_Reason:`${Vue.prototype.$apiroot}/TeaAttestation/confirmReason`,
+        get_OpOpenYN:`${Vue.prototype.$apiroot}/Get_L01_operate_open`,
       }
     }
-  }, 
+  },
   {
     path: "/teaattestationquery",//授課教師查看課程學習成果
     name: "teaattestationquery",
@@ -533,10 +572,10 @@ const routes = [
       },
       api_interface:
       {
-        get_attestationResult:`${Vue.prototype.$apiroot}/TeaAttestation/attestationResult`,      
+        get_attestationResult:`${Vue.prototype.$apiroot}/TeaAttestation/attestationResult`,
       }
     }
-  }, 
+  },
   {
     path: "/studiversecheck",//勾選多元表現
     name: "studiversecheck",
@@ -560,9 +599,12 @@ const routes = [
         save_form:`${Vue.prototype.$apiroot}/StuCompetition`,
         get_OpOpenYN:`${Vue.prototype.$apiroot}/Get_L01_operate_open`,
         get_Diverse_Total:`${Vue.prototype.$apiroot}/Get_Diverse_Total`,
+        //get_data:(parameter)=>{
+          //return stuAPI.StuOther.GetList(parameter)
+        //},
       }
     }
-  },  
+  },
   {
     path: "/teatutor",//導師查看學生學習成果及多元表現
     name: "teatutor",
@@ -580,7 +622,7 @@ const routes = [
         get_data:`${Vue.prototype.$apiroot}/TeaAttestation/teaTutor`,
       }
     }
-  },   
+  },
   {
     path: "/teaconsultquery",//課程諮詢教師查看學生學習成果及多元表現
     name: "teaconsultquery",
@@ -598,7 +640,7 @@ const routes = [
         get_data:`${Vue.prototype.$apiroot}/TeaAttestation/teaTutor`,
       }
     }
-  },   
+  },
   {
     path: "/LearningResultView",//管理者查看學生學習成果
     name: "LearningResultView",
@@ -616,7 +658,7 @@ const routes = [
         get_data:`${Vue.prototype.$apiroot}/TeaAttestation/LearningResult`,
       }
     }
-  },     
+  },
   {
     path: "/MultipleLearningView",//管理者查看學生多元表現
     name: "MultipleLearningView",
@@ -634,7 +676,7 @@ const routes = [
         get_data:`${Vue.prototype.$apiroot}/TeaAttestation/MultipleLearning`,
       }
     }
-  },  
+  },
   {
     path: "/AttestationNotYet",//管理者查看教師末證數
     name: "AttestationNotYet",
@@ -653,7 +695,7 @@ const routes = [
         get_stddata:`${Vue.prototype.$apiroot}/TeaAttestation/AttestationStdNotYet`,
       }
     }
-  },  
+  },
   {
     path: "/SystemSetup",//設定功能參數
     name: "SystemSetup",
@@ -691,7 +733,7 @@ const routes = [
         get_data:`${Vue.prototype.$apiroot}/Get_L01_operate`,
       }
     }
-  },  
+  },
   {
     path: "/StuTurnView",//學習歷程資料匯出入
     name: "StuTurnView",
@@ -713,7 +755,7 @@ const routes = [
         get_studata:`${Vue.prototype.$apiroot}/S04_student`,
       }
     }
-  },  
+  },
 ]
 
 
@@ -724,7 +766,6 @@ const router = new VueRouter({
 router.beforeEach((to, from, next) => {
   next();
   router.app.$nextTick(() => {
-    //console.log(to)
     // document.body.scrollTop = 0;
   });
 });

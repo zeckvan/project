@@ -3,7 +3,6 @@
     <v-pubquery v-on:get-condition="getcondition"></v-pubquery>
     <div align="left" v-if="this.formSaveCheck == 'stuattestation'">
           <div v-if="operate_state.open_yn == 'Y'">
-            
           </div>
           <div v-else>
             <el-alert
@@ -251,7 +250,8 @@ import stuconsultform from '@/components/student/stu_consult_form.vue'
 import PubQuery from '@/components/pub/pub_query.vue'
 import fileupload from '@/components/pub/pub_upload.vue'
 import * as data_structure from '@/js/stu_grid_structure.js'
-
+import * as fileAPI from '@/apis/fileApi.js'
+import * as stuAPI from '@/apis/stuApi.js'
 export default {
   props: {
     userStatic: {
@@ -291,7 +291,7 @@ export default {
     }
   },
   methods: {
-    del_data: function (val) {
+    del_data:async function (val) {
       let _self = this
 
       if(val.row.n == 'Y')
@@ -305,50 +305,39 @@ export default {
           return false
         }
       }
-      _self.$confirm(`確定刪除?`, 'Warning', {
-        confirmButtonText: '確定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        const loading = _self.$loading({
-        lock: true,
-        text: '資料讀取中，請稍後。',
-        spinner: 'el-icon-loading',
-        background: 'rgba(0, 0, 0, 0.7)'
-        });
 
-        var complex_key = `${val.row.a}_${val.row.b}_${val.row.c}_${val.row.d}_${val.row.e}_${val.row.f}_${val.row.g}_${val.row.h}_${val.row.i}`
-        apiurl = _self.api_interface.del_data
-        _self.$http({
-          headers: {'Content-Type': 'application/json','SkyGet':_self.$token },
-          url: apiurl,
-          method: 'delete',
-          data:{argdata:complex_key}
-        })
-          .then((res) => {
-            if (res.data.status == 'Y') {
-              _self.$message.success('刪除成功!!')
-              _self.rightData.splice(val.$index, 1);
-              var obj = {
-                    year:_self.year,
-                    sms: _self.sms
-                  }
-              _self.getcondition(obj) 
-            } else {
-              _self.$message.error('刪除失敗!!')
-            }
-          })
-          .catch((error) => {
-            _self.$message({
-              message: '系統發生錯誤'+error,
-              type: 'error',
-              duration:0,
-              showClose: true,
-            })
-          })
-          .finally(() => loading.close())
-      }).catch(() => {
-      })
+      const confirm =  await _self.$confirm(`確定刪除?`, 'Warning', {
+                confirmButtonText: '確定',
+                cancelButtonText: '取消',
+                type: 'warning'
+              }).catch(()=>{})
+
+      if(confirm !== 'confirm')
+      {
+        return  _self.$message.info('已取消刪除!!')
+      }
+
+
+      var complex_key = `${val.row.a}_${val.row.b}_${val.row.c}_${val.row.d}_${val.row.e}_${val.row.f}_${val.row.g}_${val.row.h}_${val.row.i}`
+      apiurl = _self.api_interface.del_data
+
+      const { data, statusText } = await stuAPI.stu_attestation.Delete(complex_key) 
+
+      if (statusText !== "OK") {
+        throw new Error(statusText);
+      }
+
+      if (data.status == 'Y') {
+            _self.$message.success('刪除成功!!')
+            _self.rightData.splice(val.$index, 1);
+            var obj = {
+                  year:_self.year,
+                  sms: _self.sms
+                }
+            _self.getcondition(obj) 
+      } else {
+        _self.$message.error('刪除失敗:'+data.message)
+      }
     },
     leftRowClick:function(row, column, event)
     {
@@ -589,17 +578,10 @@ export default {
       this.edit_model = 'edit'
       this.isShow = true
     },
-    file_data: function (val) {
+    file_data:async function (val) {
       this.datarow = val
       let _self = this
       let complex_key = ''
-      apiurl = _self.api_interface.file_data
-      const loading = _self.$loading({
-        lock: true,
-        text: '資料讀取中，請稍後。',
-        spinner: 'el-icon-loading',
-        background: 'rgba(0, 0, 0, 0.7)'
-      });
 
       _self.data_structure.rightheader.forEach(function (value, index, array) {
         if (value.parameter == "Y") {
@@ -609,22 +591,12 @@ export default {
 
       _self.parameter["class_name"] = _self.userStatic.interface
 
-      // if(_self.userStatic.interface == 'StuAttestation'){
-      //   if(val.row.n == 'Y'){
-      //     _self.userStatic.file_delete = false
-      //     _self.parameter["deleteFile"] = 'N'
-      //   }
-      //   else{
-      //     _self.userStatic.file_delete = true
-      //     _self.parameter["deleteFile"] = 'Y'
-      //   }        
-      // }
       _self.userStatic.checkbox = false
 
       if(_self.userStatic.interface == 'StuAttestation'){
             complex_key = `${val.row.a}_${val.row.b}_${val.row.c}_${val.row.d}_${val.row.e}_${val.row.f}_${val.row.g}_${val.row.h}_0`
         }else if(_self.userStatic.interface == 'StudCadre'){
-            complex_key = `${val.row.a}_${val.row.c}_${val.row.d}_${val.row.b}_${val.row.e}_${val.row.h}`                    
+            complex_key = `${val.row.a}_${val.row.c}_${val.row.d}_${val.row.b}_${val.row.k}`                    
         }
         else{
             complex_key = `${val.row.a}_${val.row.b}_${val.row.c}_${val.row.d}_${val.row.e}`
@@ -632,24 +604,23 @@ export default {
        _self.parameter["flag"] = _self.userStatic.data_structure
        _self.parameter["complex_key"] = complex_key
        _self.parameter["token"] = _self.$token
-      _self.$http({
-        url: apiurl,
-        method: 'get',
-        params: _self.parameter,
-        headers:{'SkyGet':_self.$token}
-      })
-        .then((res) => {
-          if (res.data.status == 'Y') {    
+
+      const { data, statusText } = await fileAPI.StuFileInfo.file_data(_self.parameter) 
+
+      if (statusText !== "OK") {
+        throw new Error(statusText);
+      }
+
+      if (data.status == 'Y') {    
             if(_self.formSaveCheck == 'stuattestationcentraldb'){
-              _self.filelist = res.data.dataset.filter(function(item,index,array){
+              _self.filelist = data.dataset.filter(function(item,index,array){
                 return item.attestation_file_yn == 'Y'
               })
             }
             else{
-              _self.filelist = res.data.dataset  
+              _self.filelist = data.dataset  
             } 
-         
-           // _self.filelist = res.data.dataset
+        
             _self.filelist.forEach(function(item,index,array){
                       if(item.attestation_file_yn == 'Y'){
                         item.attestation_file_yn = true
@@ -657,22 +628,10 @@ export default {
                         item.attestation_file_yn = false
                       }                      
                   })                  
-          } else {
-            _self.filelist = []
-            _self.$message.error('查無資料，請確認')
-          }
-        })
-        .catch((error) => {
-            _self.tableData = []
-            _self.$message({
-              message: '系統發生錯誤'+error,
-              type: 'error',
-              duration:0,
-              showClose: true,
-            })
-          })
-        .finally(() => loading.close())
-
+      } else {
+        _self.filelist = []
+        _self.$message.error('查無資料，請確認')
+      }     
       this.isShow2 = true
     },
     file_upload: function (val) {
@@ -736,13 +695,13 @@ export default {
           }
       _self.getcondition(obj) 
     },
-    getcondition: function (val) {
-      var _self = this;
+    getcondition:function (val) {
+      var _self = this
       _self.year = val.year
       _self.sms = val.sms
 
       apiurl = _self.api_interface.get_data
-      this.get_data(apiurl, val.year, val.sms, _self.currentPage, _self.pageSize)
+     // await this.get_data(apiurl, val.year, val.sms, _self.currentPage, _self.pageSize)
       if(this.userStatic.data_structure == 'stuattestation')
       {
         apiurl = this.api_interface.get_OpOpenYN
@@ -755,7 +714,16 @@ export default {
           token:this.$token,
           kind_id:'stu'
         }
-        this.operate_state = data_structure.getOpenOpYN(this,apiurl,parameter,this.$token)  
+
+        //this.operate_state = await data_structure.getOpenOpYN(this,apiurl,parameter,this.$token)         
+        const promises = [
+             this.get_data( _self.api_interface.get_data, val.year, val.sms, _self.currentPage, _self.pageSize),
+             data_structure.getOpenOpYN(this,this.api_interface.get_OpOpenYN,parameter,this.$token) 
+        ];
+
+        Promise.allSettled(promises).then(values => {
+          this.operate_state = values[1].value
+        });      
       }
     },
     current_change(val) {
@@ -779,14 +747,8 @@ export default {
       apiurl = _self.api_interface.get_data
       this.get_data(apiurl, _self.year, _self.sms, start, end)
     },
-    get_data: function (apiurl, year, sms, start, end) {
+    get_data:async function (apiurl, year, sms, start, end) {
       let _self = this
-      const loading = _self.$loading({
-        lock: true,
-        text: '資料讀取中，請稍後。',
-        spinner: 'el-icon-loading',
-        background: 'rgba(0, 0, 0, 0.7)'
-      });
 
       _self.parameter.emp_id = ''      
       _self.parameter.std_no = ''
@@ -798,23 +760,23 @@ export default {
       _self.parameter.is_sys = '0'
       _self.parameter.token = _self.$token
 
-      _self.$http({
-        url: apiurl,
-        method: 'get',
-        params: _self.parameter,
-        headers:{'SkyGet':_self.$token}
-      })
-        .then((res) => {  
-          if (res.data.status == 'Y') {
+      try {
+        const { data, statusText } = await apiurl(_self.parameter) 
+
+        if (statusText !== "OK") {
+                throw new Error(statusText);
+        }
+
+        if (data.status == 'Y') {
             if(_self.formSaveCheck == 'stuattestationcentraldb'){
-              _self.tableData = res.data.dataset.filter(function(item,index,array){
+              _self.tableData = data.dataset.filter(function(item,index,array){
                 return item.x_cnt2 > 0
               })
             }else{
-              _self.tableData = res.data.dataset  
+              _self.tableData = data.dataset  
             }
-            _self.tempData = res.data.dataset  
-            _self.rightData = res.data.dataset
+            _self.tempData = data.dataset  
+            _self.rightData = data.dataset
             const result = [];
             const map = new Map();
             for (const item of _self.tableData) {
@@ -829,11 +791,11 @@ export default {
             {
               if(this.src_dup != "")
               {
-                _self.rightData = res.data.dataset.filter(x => x.f == _self.src_dup && x.s != '')
+                _self.rightData = data.dataset.filter(x => x.f == _self.src_dup && x.s != '')
               }
               else
               {
-                _self.rightData = res.data.dataset.filter(x => x.f == _self.tableData[0].f && x.s != '')
+                _self.rightData = data.dataset.filter(x => x.f == _self.tableData[0].f && x.s != '')
               }
             }
             
@@ -851,30 +813,21 @@ export default {
                               }else{
                                 item.v = false
                               }
-                        }
-                        
+                        }                        
                     })      
-                   
-            _self.total = res.data.dataset[0].x_total
+                    
+            _self.total = data.dataset[0].x_total
             if( _self.tableData.length <= 0){
               _self.$message.error('查無資料，請確認')
             }
-          } else {
-            _self.tableData = []
-            _self.rightData = []
-            _self.$message.error('查無資料，請確認')
-          }
-        })
-        .catch((error) => {
-            _self.tableData = []
-            _self.$message({
-              message: '系統發生錯誤'+error,
-              type: 'error',
-              duration:0,
-              showClose: true,
-            })
-          })
-        .finally(() => loading.close())
+        } else {
+          _self.tableData = []
+          _self.rightData = []
+          _self.$message.error('查無資料，請確認')
+        }
+      } catch (error) {
+        
+      }
     },
   },
   components: {

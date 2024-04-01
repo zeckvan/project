@@ -5,12 +5,23 @@
         </div> 
         <div align="left">
           <div v-if="operate_state.open_yn == 'Y'">
-            <el-button type="primary" v-on:click="centraldb_batch">確認存檔</el-button>
+            <el-row>
+              <el-col :span="4"><el-button type="primary" v-on:click="centraldb_batch">確認存檔</el-button></el-col>
+              <el-col :span="20">
+                <el-alert
+                  :closable = false
+                  :title = "'系統開放勾選時間：'+ operate_state.startdate + '~' + operate_state.enddate"
+                  type="error">
+                </el-alert>
+              </el-col>
+            </el-row>
+            
+
           </div>
           <div v-else>
             <el-alert
               :closable = false
-              :title = "'系統開放勾選時間：'+ operate_state.startdate + '~' + operate_state.enddate"
+              :title = "operate_state.startdate == ''? '未設定開放勾選時間':'系統開放勾選時間：'+ operate_state.startdate + '~' + operate_state.enddate"
               type="error">
             </el-alert>
           </div>            
@@ -122,7 +133,8 @@ import stuconsultform from '@/components/student/stu_consult_form.vue'
 import PubQuery from '@/components/pub/pub_query.vue'
 import fileupload from '@/components/pub/pub_upload.vue'
 import * as data_structure from '@/js/stu_grid_structure.js'
-
+import * as stuAPI from  '@/apis/stuApi.js' 
+import * as fileAPI from  '@/apis/fileApi.js' 
 export default {
   props: {
 
@@ -321,35 +333,29 @@ export default {
                       
             _self.getcondition(obj)*/
     },
-    centraldb_batch:function(){
-          var i = 0;
-          var no = 0;
-          let _self = this
-          let formdata = new FormData();
+    centraldb_batch:async function(){
+        var i = 0;
+        var no = 0;
+        let _self = this
+        let formdata = new FormData();
 
-          _self.check_list.length = 0;
+        _self.check_list.length = 0;
 
-          this.tableData.forEach((element, index) => {
-            _self.check_list[i++] = element
-            if(element.x_status)
-            {
-              no++;
-            }
-          });
-
-          if((this.diverse_sel - this['x_'+this.getIndex])+no > this.diverse_tot)
+        this.tableData.forEach((element, index) => {
+          _self.check_list[i++] = element
+          if(element.x_status)
           {
-            _self.$message.error('已大於上限10筆，請確認!!')
-            return false
+            no++;
           }
-/*
-          if(_self.check_list.length == 0){
-            _self.$message.error('未勾選課程學習成果，請確認!!');
-            return false;
-          }     
-*/
+        });
 
-          _self.check_list.forEach(function(value, index, array){
+        if((this.diverse_sel - this['x_'+this.getIndex])+no > this.diverse_tot)
+        {
+          _self.$message.error('已大於上限10筆，請確認!!')
+          return false
+        }
+
+        _self.check_list.forEach(function(value, index, array){
             if(_self.opno == 'stucadre'){
               formdata.append('complex_array[]',value.a +'_'+value.c+'_'+value.d+'_'+value.b+'_'+value.e+'_'+value.h+'@'+value.x_status)
             }else{
@@ -358,14 +364,27 @@ export default {
           });
 
         formdata.append('token',_self.$token)
-        const loading = _self.$loading({
-              lock: true,
-              text: '資料處理中，請稍後。',
-              spinner: 'el-icon-loading',
-              background: 'rgba(0, 0, 0, 0.7)'
-              });
 
         const apiurl = _self.api_interface.save_centraldb
+
+        const { data, statusText } = await apiurl(formdata) 
+
+        if (statusText !== "OK") {
+          throw new Error(statusText);
+        }
+        if (data.status == 'Y'){
+            _self.$message.success('存檔成功!!')
+            var obj = {
+                        year:_self.year,
+                        sms: _self.sms
+                      }
+                      
+            await _self.getcondition(obj)
+        }else{
+            _self.$message.error(data.message)
+        }
+
+        /**
         _self.$http({
             url:apiurl,
             method:"put",
@@ -393,8 +412,8 @@ export default {
                 showClose: true,
                 })
             })
-            .finally(()=>loading.close())      
-          
+            .finally(()=>loading.close())     
+         */          
     },
     confirm_batch:function(){
           var i = 0;
@@ -578,7 +597,7 @@ export default {
       this.edit_model = 'edit'
       this.isShow = true
     },
-    file_data: function (val) {
+    file_data:async function (val) {
       let _self = this
       let complex_key = ''
       apiurl = _self.api_interface.file_data
@@ -611,38 +630,26 @@ export default {
       if(_self.userStatic.interface == 'StuAttestation'){
             complex_key = `${val.row.a}_${val.row.b}_${val.row.c}_${val.row.d}_${val.row.e}_${val.row.f}_${val.row.g}_${val.row.h}_0`
         }else if(_self.userStatic.interface == 'StudCadre'){
-            complex_key = `${val.row.a}_${val.row.c}_${val.row.d}_${val.row.b}_${val.row.e}_${val.row.h}`                    
+            complex_key = `${val.row.a}_${val.row.c}_${val.row.d}_${val.row.b}_${val.row.k}`                    
         }
         else{
             complex_key = `${val.row.a}_${val.row.b}_${val.row.c}_${val.row.d}_${val.row.e}`
         }
 
        _self.parameter["complex_key"] = complex_key
-      _self.$http({
-        url: apiurl,
-        method: 'get',
-        params: _self.parameter,
-        headers:{'SkyGet':_self.$token}
-      })
-        .then((res) => {
-          if (res.data.status == 'Y') {
-            _self.filelist = res.data.dataset
-          } else {
-            _self.filelist = []
-            _self.$message.error('查無資料，請確認')
-          }
-        })
-        .catch((error) => {
-            _self.tableData = []
-            _self.$message({
-              message: '系統發生錯誤'+error,
-              type: 'error',
-              duration:0,
-              showClose: true,
-            })
-          })
-        .finally(() => loading.close())
 
+       const { data, statusText } = await fileAPI.StuFileInfo.file_data(_self.parameter) 
+
+      if (statusText !== "OK") {
+        throw new Error(statusText);
+      }
+
+      if (data.status == 'Y') {
+            _self.filelist = data.dataset
+      } else {
+        _self.filelist = []
+        _self.$message.error('查無資料，請確認')
+      }
       this.isShow2 = true
     },
     file_upload: function (val) {
@@ -727,21 +734,21 @@ export default {
     getshow3: function (val) {
       this.isShow3 = val.show;
     },
-    getcondition: function (val) {
+    getcondition:async function (val) {
       var _self = this;
       _self.year = val.year
       _self.sms = val.sms
       _self.tableData = []
       _self.total = 0
       apiurl = _self.api_interface.get_data
-      this.get_data(apiurl, val.year, val.sms, _self.currentPage, _self.pageSize)
+      await this.get_data(apiurl, val.year, val.sms, _self.currentPage, _self.pageSize)
       this.$router.options.routes.find(function(item,index,array){
                 if(item.name == "studiversecheck"){
-                  apiurl = item.props.api_interface.get_OpOpenYN
-                  let parameter={year_id:val.year,sms_id:0,grade_id:'1',type_id:'04',token:_self.$token,kind_id:'stu'}
-                  _self.operate_state = data_structure.getOpenOpYN(_self,apiurl,parameter,_self.$token)                                    
+                  apiurl = item.props.api_interface.get_OpOpenYN                             
                 }
-            })
+            })   
+      let parameter={year_id:val.year,sms_id:0,grade_id:'1',type_id:'04',token:_self.$token,kind_id:'stu'}
+      _self.operate_state = await data_structure.getOpenOpYN(_self,apiurl,parameter,_self.$token)       
     },
     current_change(val) {
       var _self = this;
@@ -771,76 +778,98 @@ export default {
       apiurl = _self.api_interface.get_data
       this.get_data(apiurl, _self.year, _self.sms, start, end)
     },
-    get_data: function (apiurl, year, sms, start, end) {
-      let _self = this
-      const loading = _self.$loading({
-        lock: true,
-        text: '資料讀取中，請稍後。',
-        spinner: 'el-icon-loading',
-        background: 'rgba(0, 0, 0, 0.7)'
-      });
+    get_data:async function (apiurl, year, sms, start, end) {
+      try {
+            let _self = this
 
-      _self.parameter.emp_id = ''      
-      _self.parameter.std_no = ''
-      _self.parameter.token = _self.$token
-      _self.parameter.year_id = year
-      _self.parameter.sms_id = sms
-      _self.parameter.sRowNun = start
-      _self.parameter.eRowNun = end
-      _self.parameter.sch_no = ''
-      _self.parameter.is_sys = '2'
+            _self.parameter.emp_id = ''      
+            _self.parameter.std_no = ''
+            _self.parameter.token = _self.$token
+            _self.parameter.year_id = year
+            _self.parameter.sms_id = sms
+            _self.parameter.sRowNun = start
+            _self.parameter.eRowNun = end
+            _self.parameter.sch_no = ''
+            _self.parameter.is_sys = '2'
 
-      _self.$http({
-        url: apiurl,
-        method: 'get',
-        params: _self.parameter,
-        headers:{'SkyGet':_self.$token}
-      })
-        .then((res) => {  
-          if (res.data.status == 'Y') {     
-            if(_self.opno == 'stucadre'){
-              _self.tableData = res.data.dataset.filter(function(item,index,array){
-                return item.j == '2'
-              })
-            }else{
-              _self.tableData = res.data.dataset  
+            const { data, statusText } = await apiurl(_self.parameter) 
+
+            if (statusText !== "OK") {
+              throw new Error(statusText);
             }
-            
-            _self.tableData.forEach(function(item,index,array){
-                            if(item.zz == 'Y'){                        
-                              item.x_status = true
-                            }else{  
-                              item.x_status = false
-                            }                        
-                    })                       
-            _self.total = res.data.dataset[0].x_total
-          } else {
-            _self.tableData = []
-            _self.total = 0
-            _self.$message.error('查無資料，請確認')
-          }
-        })
-        .catch((error) => {
-            _self.tableData = []
-            _self.$message({
-              message: '系統發生錯誤'+error,
-              type: 'error',
-              duration:0,
-              showClose: true,
-            })
-          })
-        .finally(() => {
-          loading.close()
-          _self.get_diverse_total()
-        })
+
+            if (data.status == 'Y') {     
+              if(_self.opno == 'stucadre'){
+                _self.tableData = data.dataset.filter(function(item,index,array){
+                  return item.j == '2'
+                })
+              }else{
+                _self.tableData = data.dataset  
+              }
+              
+              _self.tableData.forEach(function(item,index,array){
+                              if(item.zz == 'Y'){                        
+                                item.x_status = true
+                              }else{  
+                                item.x_status = false
+                              }                        
+                      })                       
+              _self.total = data.dataset[0].x_total
+            } else {
+              _self.tableData = []
+              _self.total = 0
+              _self.$message.error('查無資料，請確認')
+            }       
+            await _self.get_diverse_total() 
+      } catch (error) {
+        
+      }
     },
-    get_diverse_total:function()
+    get_diverse_total:async function()
     {
       let _self = this
       var obj = {
                     year_id:_self.year,
                     sms_id: _self.sms
                 }
+
+      const { data, statusText } = await stuAPI.studiversecheck.Get(_self.parameter) 
+
+      if (statusText !== "OK") {
+        throw new Error(statusText);
+      }
+
+      if(data.status == 'Y')
+      {
+        _self.leftList.forEach(function(value, index, array){ 
+          value.diverseid = _self.leftTemp[index].diverseid
+          _self['x_'+(index+1)] = data.dataset[0]['x_'+(index+1)] 
+          value.diverseid = `${value.diverseid} [已勾選${data.dataset[0]['x_'+(index+1)]}/共${data.dataset[0]['x_'+(index+1)+'_tot']}筆]`
+        })
+
+        _self.leftTitle = '多元學習項目'
+        _self.diverse_sel = data.dataset[0].x_1+
+                            data.dataset[0].x_2+
+                            data.dataset[0].x_3+
+                            data.dataset[0].x_4+
+                            data.dataset[0].x_5+
+                            data.dataset[0].x_6+
+                            data.dataset[0].x_7+
+                            data.dataset[0].x_8+
+                            data.dataset[0].x_9+
+                            data.dataset[0].x_10
+
+        _self.diverse_tot = data.dataset[0].x_total
+        _self.leftTitle = `${_self.leftTitle}[已勾選${_self.diverse_sel}筆/最多${_self.diverse_tot}筆]`
+      }
+      else
+      {
+        _self.diverse_sel = 0
+        _self.diverse_tot = 0
+        _self.leftTitle = '多元學習項目'
+      }
+
+      /*
     apiurl = `${_self.$apiroot}/Get_Diverse_Total`      
     _self.$http({
         url: apiurl,
@@ -888,6 +917,7 @@ export default {
             })
           })
         .finally()
+       */
     }
   },
   components: {

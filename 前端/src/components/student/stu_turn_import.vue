@@ -145,6 +145,7 @@ export default {
             headers: { "Content-Type": "multipart/form-data",'SkyGet':_self.$token },
           })
             .then((res) => {
+              console.log(res)
               if (res.data.status == 'Y') {
                 _self.is_success = 'Y'
                 //_self.$message.success('匯入成功!!')

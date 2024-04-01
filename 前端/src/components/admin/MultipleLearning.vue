@@ -20,6 +20,7 @@
 <script type="module">
 var apiurl = ''
 import * as data_structure from '@/js/tea_grid_structure.js'
+import * as adminAPI from  '@/apis/adminApi.js' 
 
 export default {
   props: {
@@ -46,18 +47,6 @@ export default {
     return {
         tableData:[],
         data_structure: {},
-        /*
-        queryform:{
-                  year_id:"",
-                  sms_id:"",
-                  cls_id:'',  
-                  std_no:'',
-                  std_name:'',
-                  emp_id:"10615",
-                  sRowNun:1,
-                  eRowNun:10    
-        },
-        */
         yearlist:[],
         smslist:[],
         clslist:[],
@@ -103,6 +92,7 @@ export default {
         this.get_data()
     },  
     get_data:function(apiurl){
+      /**
         let _self = this
             const loading = _self.$loading({
               lock: true,
@@ -136,6 +126,7 @@ export default {
                   })
             })
             .finally(() => loading.close())
+       */
     },
     query:function(){     
       this.get_data()

@@ -175,7 +175,7 @@ import stuconsultform from '@/components/student/stu_consult_form.vue'
 import PubQuery from '@/components/pub/pub_query.vue'
 import fileupload from '@/components/pub/pub_upload.vue'
 import * as data_structure from '@/js/stu_grid_structure.js'
-
+import * as fileAPI from  '@/apis/fileApi.js' 
 export default {
   props: {
     userStatic: {
@@ -446,17 +446,11 @@ export default {
       this.edit_model = 'edit'
       this.isShow = true
     },
-    file_data: function (val) {
+    file_data: async function (val) {
       this.datarow = val
       let _self = this
       let complex_key = ''
       apiurl = _self.api_interface.file_data
-      const loading = _self.$loading({
-        lock: true,
-        text: '資料讀取中，請稍後。',
-        spinner: 'el-icon-loading',
-        background: 'rgba(0, 0, 0, 0.7)'
-      });
 
       _self.data_structure.header.forEach(function (value, index, array) {
         if (value.parameter == "Y") {
@@ -487,69 +481,47 @@ export default {
         }        
       }
       _self.userStatic.checkbox = false
-      //stuattestationconfirm
-      /*
-      if(_self.userStatic.data_structure == 'stuattestationcentraldb')
-      {
-        _self.parameter["flag"] = 'Y'
-      }
-      else
-      {
-        _self.parameter["flag"] = 'N'
-      }*/
+
       _self.parameter["flag"] = _self.userStatic.data_structure
       if(_self.userStatic.interface == 'StuAttestation'){
             complex_key = `${val.row.a}_${val.row.b}_${val.row.c}_${val.row.d}_${val.row.e}_${val.row.f}_${val.row.g}_${val.row.h}_0`
       }else if(_self.userStatic.interface == 'StudCadre'){
-          complex_key = `${val.row.a}_${val.row.c}_${val.row.d}_${val.row.b}_${val.row.e}_${val.row.h}`                    
+          complex_key = `${val.row.a}_${val.row.c}_${val.row.d}_${val.row.b}_${val.row.k}`                   
       }
       else{
           complex_key = `${val.row.a}_${val.row.b}_${val.row.c}_${val.row.d}_${val.row.e}`
       }
-      
+
       _self.parameter["complex_key"] = complex_key
       _self.parameter["token"] = _self.$token
-      console.log(_self.parameter)
-      _self.$http({
-        url: apiurl,
-        method: 'get',
-        params: _self.parameter,
-        headers:{'SkyGet':_self.$token}
-      })
-        .then((res) => {
-          if (res.data.status == 'Y') {    
-            if(_self.formSaveCheck == 'stuattestationcentraldb'){
-              _self.filelist = res.data.dataset.filter(function(item,index,array){
-                return item.attestation_file_yn == 'Y'
-              })
-            }
-            else{
-              _self.filelist = res.data.dataset  
-            } 
-         
-           // _self.filelist = res.data.dataset
-            _self.filelist.forEach(function(item,index,array){
-                      if(item.attestation_file_yn == 'Y'){
-                        item.attestation_file_yn = true
-                      }else{
-                        item.attestation_file_yn = false
-                      }                      
-                  })                   
-          } else {
-            _self.filelist = []
-            _self.$message.error('查無資料，請確認')
-          }
-        })
-        .catch((error) => {
-            _self.tableData = []
-            _self.$message({
-              message: '系統發生錯誤'+error,
-              type: 'error',
-              duration:0,
-              showClose: true,
+
+      const { data, statusText } = await fileAPI.StuFileInfo.file_data(_self.parameter) 
+
+      if (statusText !== "OK") {
+        throw new Error(statusText);
+      }
+
+      if (data.status == 'Y') {    
+          if(_self.formSaveCheck == 'stuattestationcentraldb'){
+            _self.filelist = data.dataset.filter(function(item,index,array){
+              return item.attestation_file_yn == 'Y'
             })
-          })
-        .finally(() => loading.close())
+          }
+          else{
+            _self.filelist = data.dataset  
+          } 
+        
+          _self.filelist.forEach(function(item,index,array){
+                if(item.attestation_file_yn == 'Y'){
+                  item.attestation_file_yn = true
+                }else{
+                  item.attestation_file_yn = false
+                }                      
+           })                   
+      } else {
+        _self.filelist = []
+        _self.$message.error('查無資料，請確認')
+      }
 
       this.isShow2 = true
     },
@@ -585,62 +557,50 @@ export default {
       _self.parameter["token"] = _self.$token
       this.isShow3 = true
     },
-    del_data: function (val) {
+    del_data:async function (val) {
       let _self = this
+      apiurl = _self.api_interface.del_data
       if (this.data_structure.delete_rule.rule_flag === "Y") {
         if (!this.data_structure.delete_rule.rule_check(val, _self)) {
           return false
         }
       }
-      _self.$confirm(`確定刪除?`, 'Warning', {
-        confirmButtonText: '確定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        const loading = _self.$loading({
-        lock: true,
-        text: '資料讀取中，請稍後。',
-        spinner: 'el-icon-loading',
-        background: 'rgba(0, 0, 0, 0.7)'
-        });
 
-        let formdata = new FormData();
+      let formdata = new FormData();
 
-        _self.data_structure.header.forEach(function (value, index, array) {
-          if (value.parameter == "Y") {
-            _self.parameter[value.col] = val.row[value.prop]
-            formdata.append(value.col, val.row[value.prop]);
-          }
-        });
+      _self.data_structure.header.forEach(function (value, index, array) {
+        if (value.parameter == "Y") {
+          _self.parameter[value.col] = val.row[value.prop]
+          formdata.append(value.col, val.row[value.prop]);
+        }
+      });
 
-        formdata.append("token",_self.$token)
-        formdata.append("class_name",_self.userStatic.interface)
-        apiurl = _self.api_interface.del_data
-        _self.$http({
-          headers: { 'Content-Type': 'application/json;charset=utf-8','SkyGet':_self.$token },
-          url: apiurl,
-          method: 'delete',
-          data: formdata
-        })
-          .then((res) => {
-            if (res.data.status == 'Y') {
-              _self.$message.success('刪除成功!!')
-              _self.tableData.splice(val.$index, 1);
-            } else {
-              _self.$message.error('刪除失敗!!')
-            }
-          })
-          .catch((error) => {
-            _self.$message({
-              message: '系統發生錯誤'+error,
-              type: 'error',
-              duration:0,
-              showClose: true,
-            })
-          })
-          .finally(() => loading.close())
-      }).catch(() => {
-      })
+      formdata.append("token",_self.$token)
+      formdata.append("class_name",_self.userStatic.interface)
+
+      const confirm =  await _self.$confirm(`確定刪除?`, 'Warning', {
+                confirmButtonText: '確定',
+                cancelButtonText: '取消',
+                type: 'warning'
+              }).catch(()=>{})
+
+      if(confirm !== 'confirm')
+      {
+        return  _self.$message.info('已取消刪除!!')
+      }
+
+      const { data, statusText } = await apiurl(formdata) 
+
+      if (statusText !== "OK") {
+        throw new Error(statusText);
+      }
+
+      if (data.status == 'Y') {
+          _self.$message.success('刪除成功!!')
+          _self.tableData.splice(val.$index, 1);
+      } else {
+        _self.$message.error('刪除失敗!!')
+      }      
     },
     getshow: function (val) {
       this.isShow = val.show;
@@ -700,80 +660,64 @@ export default {
       apiurl = _self.api_interface.get_data
       this.get_data(apiurl, _self.year, _self.sms, start, end)
     },
-    get_data: function (apiurl, year, sms, start, end) {
-      console.log(apiurl)
-      let _self = this
-      const loading = _self.$loading({
-        lock: true,
-        text: '資料讀取中，請稍後。',
-        spinner: 'el-icon-loading',
-        background: 'rgba(0, 0, 0, 0.7)'
-      });
+    get_data: async function (apiurl, year, sms, start, end) {
+      try {
+            let _self = this
 
-      _self.parameter.emp_id = ''      
-      _self.parameter.std_no = ''
-      _self.parameter.year_id = year
-      _self.parameter.sms_id = sms
-      _self.parameter.sRowNun = start
-      _self.parameter.eRowNun = end
-      _self.parameter.sch_no = ''
-      _self.parameter.is_sys = '0'
-      _self.parameter.token = _self.$token
+            _self.parameter.emp_id = ''      
+            _self.parameter.std_no = ''
+            _self.parameter.year_id = year
+            _self.parameter.sms_id = sms
+            _self.parameter.sRowNun = start
+            _self.parameter.eRowNun = end
+            _self.parameter.sch_no = ''
+            _self.parameter.is_sys = '0'
+            _self.parameter.token = _self.$token
 
-      _self.$http({
-        url: apiurl,
-        method: 'get',
-        params: _self.parameter,
-        headers:{'SkyGet':_self.$token}
-      })
-        .then((res) => {  
-          if (res.data.status == 'Y') {         
-            if(_self.formSaveCheck == 'stuattestationcentraldb'){
-              _self.tableData = res.data.dataset.filter(function(item,index,array){
-                return item.x_cnt > 0
-              })
-            }else{
-              _self.tableData = res.data.dataset  
+            const { data, statusText } = await apiurl(_self.parameter) 
+
+            if (statusText !== "OK") {
+              throw new Error(statusText);
             }
- 
-            _self.tableData.forEach(function(item,index,array){
-                        if(_self.data_structure.confirm_batch){
-                            if(item.u == 'Y'){
-                                item.x_status = "已送出"
-                              }else{
-                                item.x_status = false
-                              }
-                        }
-                        if(_self.data_structure.centraldb_batch){
-                            if(item.v == 'Y'){
-                                item.v = true
-                              }else{
-                                item.v = false
-                              }
-                        }
+
+            if (data.status == 'Y') {         
+                  if(_self.formSaveCheck == 'stuattestationcentraldb'){
+                    _self.tableData = data.dataset.filter(function(item,index,array){
+                      return item.x_cnt > 0
+                    })
+                  }else{
+                    _self.tableData = data.dataset  
+                  }
+
+                  _self.tableData.forEach(function(item,index,array){
+                      if(_self.data_structure.confirm_batch){
+                          if(item.u == 'Y'){
+                              item.x_status = "已送出"
+                            }else{
+                              item.x_status = false
+                            }
+                      }
+                      if(_self.data_structure.centraldb_batch){
+                          if(item.v == 'Y'){
+                              item.v = true
+                            }else{
+                              item.v = false
+                            }
+                      }
+                      
+                  })      
                         
-                    })      
-                   
-            _self.total = res.data.dataset[0].x_total
-            if( _self.tableData.length <= 0){
+                  _self.total = data.dataset[0].x_total
+                  if( _self.tableData.length <= 0){
+                    _self.$message.error('查無資料，請確認')
+                  }
+            } else {
+              _self.tableData = []
               _self.$message.error('查無資料，請確認')
-            }
-           // _self.currentPage = 1
-          } else {
-            _self.tableData = []
-            _self.$message.error('查無資料，請確認')
-          }
-        })
-        .catch((error) => {
-            _self.tableData = []
-            _self.$message({
-              message: '系統發生錯誤'+error,
-              type: 'error',
-              duration:0,
-              showClose: true,
-            })
-          })
-        .finally(() => loading.close())
+            }        
+      } catch (error) {
+        
+      }
     },
   },
   components: {

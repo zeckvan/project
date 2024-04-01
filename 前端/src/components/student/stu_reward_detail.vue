@@ -50,7 +50,6 @@
           })
           .catch((error)=>{
             _self.tableData = [];
-            //console.log(error);
           })
           .finally(()=>loading.close());
       }

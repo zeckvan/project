@@ -1,6 +1,6 @@
 <template>
-  <div id="app">    
-      <Menu/>    
+  <div id="app">
+<Menu/>
     <router-view style="margin-top:15px" :key="$route.path"></router-view>
   </div>
 </template>
@@ -20,29 +20,28 @@
                     activeIndex:"0",
                     first:"N"
                 }
-            },    
+            },
     components: {
         StuBasic,
         StuAddendQuery,
         StuAddendDetail,
         StuRewardDetail,
         Menu,
-        'v-pubquery': PubQuery  
-              
+        'v-pubquery': PubQuery
+
     },
     methods: {
         handleSelect:function(key, keyPath){
-                   //console.log(key,keyPath)
                    this.content = key
                    this.isShow = true
                 }
     },
     mounted: function () {
-      
+
     },
     created:function(){
-//      console.log('zecktest',this.$router.params);
-    }   
+
+    }
   }
 </script>
 
@@ -71,9 +70,9 @@ nav {
 .el-table__body .el-table__row.hover-row td {
         background-color:#ffd04b !important;
         cursor: pointer;
-      }  
+      }
 .el-table tbody tr:hover>td {
   background-color:#ffd04b !important;
   cursor: pointer;
-}           
+}
 </style>

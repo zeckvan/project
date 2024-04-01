@@ -54,7 +54,7 @@
       
 <script type="module">
     import * as file_structure from '@/js/fileuplod_rule.js'  
-
+    import * as fileAPI from  '@/apis/fileApi.js' 
     export default {
             props: {
                     dialog_show: {
@@ -170,7 +170,7 @@
                 uploadfile(file){
 
                 },
-                submitUpload() {
+                async submitUpload() {
                     let _self = this
                     let apiurl  = ""
                     let formdata = new FormData();
@@ -194,7 +194,7 @@
                         complex_key = `${_self.rowdata.row.a}_${_self.rowdata.row.b}_${_self.rowdata.row.c}_${_self.rowdata.row.d}_${_self.rowdata.row.e}_${_self.rowdata.row.f}_${_self.rowdata.row.g}_${_self.rowdata.row.h}_0`
                         formdata.append("complex_key",complex_key)
                     }else if(_self.userStatic.interface == 'StudCadre'){
-                        complex_key = `${_self.rowdata.row.a}_${_self.rowdata.row.c}_${_self.rowdata.row.d}_${_self.rowdata.row.b}_${_self.rowdata.row.e}_${_self.rowdata.row.h}`
+                        complex_key = `${_self.rowdata.row.a}_${_self.rowdata.row.c}_${_self.rowdata.row.d}_${_self.rowdata.row.b}_${_self.rowdata.row.k}`
                         formdata.append("complex_key",complex_key)                       
                     }
                     else{
@@ -203,60 +203,24 @@
                     }
                     formdata.append("token",_self.$token)
 
- /*
-                    else if(_self.userStatic.interface.substr(0,3) == 'Stu'){
-                        complex_key = `${_self.rowdata.row.sch_no}_${_self.rowdata.row.year_id}_${_self.rowdata.row.sms_id}_${_self.rowdata.row.std_no}_${_self.rowdata.row.ser_id}`
-                        formdata.append("complex_key",complex_key)
-                    }else if(_self.userStatic.interface.substr(0,3) == 'Tea'){
-                        complex_key = `${_self.rowdata.row.sch_no}_
-                                        ${_self.rowdata.row.year_id}_
-                                        ${_self.rowdata.row.sms_id}_
-                                        ${_self.rowdata.row.emp_id}_
-                                        ${_self.rowdata.row.ser_id}`
-                        formdata.append("complex_key",complex_key)
-                    }*/                   
+                    try {
+                        const { data, statusText } = await fileAPI.StuFileInfo.file_upload(formdata) 
 
-/*
-                    switch (this.userStatic.data_structure) {
-                        case 'stucadre':
-                            apiurl = `${this.$apiroot}/${this.userStatic.interface}/file`
-                            break;
-                        case 'stustudyf':
-                            apiurl = `${this.$apiroot}/absenceRecord/010106`  
-                            break;                
-                        default:                
-                    }   
-*/
-                    apiurl = _self.api_interface.file_upload
-                    const loading = _self.$loading({
-                                    lock: true,
-                                    text: '資料讀取中，請稍後。',
-                                    spinner: 'el-icon-loading',
-                                    background: 'rgba(0, 0, 0, 0.7)'
-                                    });	
+                        if (statusText !== "OK") {
+                            throw new Error(statusText);
+                        }
 
-                    _self.$http({
-                            //headers: { 'Content-Type': 'application/json;charset=utf-8'},
-                            url:apiurl,
-                            method:'post',
-                            data:formdata,
-                            headers:{'SkyGet':_self.$token}
-                        })
-                        .then((res)=>{
-                                        loading.close();
-                                        if (res.data.status == 'Y'){     
-                                            _self.$message.success('上傳成功!!')
-                                            _self.success = true
-                                            _self.check_disabled = true
-                                            _self.cancel()
-                                        }else{
-                                            _self.$message.error('上傳失敗')
-                                        }     
-                                })        
-                        .catch((error)=>{
-                                    _self.$message.error('上傳失敗，請確認:'+error)
-                                })
-                        .finally(()=>loading.close())                           
+                        if (data.status == 'Y'){     
+                                this.$message.success('上傳成功!!')
+                                this.success = true
+                                this.check_disabled = true
+                                this.cancel()
+                        }else{
+                            this.$message.error('上傳失敗:'+data.message)
+                        }     
+                    } catch (error) {
+                        this.$message.error('上傳失敗，請確認:'+error)
+                    }
                 },
             },
             mounted() {        

@@ -73,7 +73,7 @@
                 return [year, month, day].join('-')
             },      
       getForm:function(val){    
-        console.log('zeck1',val)    
+
         let _self = this
             
         const apiurl = `${this.$apiroot}/absenceRecord/${_self.$token}`         
@@ -108,7 +108,6 @@
                         })        
                   .catch((error)=>{
                                     _self.tableData = []
-                                    console.log(error)
                         })
                   .finally(()=>loading.close())            
       }

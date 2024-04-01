@@ -39,7 +39,7 @@
 <script type="module">
   var apiurl = ''
   import * as data_structure from '@/js/pub_grid_structure.js'
-
+  import * as adminAPI from '@/apis/adminApi.js'
 
   export default {
     props: {
@@ -71,75 +71,6 @@
       }
     },
     methods: {
-      add_data:function(){
-        var i = 0;
-        var _self = this;
-        let formdata = new FormData();
-
-        _self.check_list.length = 0;
-        apiurl = _self.api_interface.insertConsult_SetUp
-        this.clsdata.forEach((element, index) => {
-          if(element.x_status == true){
-            _self.check_list[i++] = element
-            formdata.append('year_id[]',element.year_id);
-            formdata.append('sms_id[]',element.sms_id);
-            formdata.append('deg_id[]',element.deg_id);
-            formdata.append('dep_id[]',element.dep_id);
-            formdata.append('bra_id[]',element.bra_id);
-            formdata.append('grd_id[]',element.grd_id);
-            formdata.append('cls_id[]',element.cls_id);
-            formdata.append('emp_id[]',this.getempid);
-          }
-        });
-        formdata.append('token',this.$token);
-        if(this.getempid == '' || this.getempid == null){
-          _self.$message.error('未勾新增課程教師，請確認!!');
-          return false;
-        }  
-
-        if(_self.check_list.length == 0){
-          _self.$message.error('未勾新增課程班級，請確認!!');
-          return false;
-        }     
-
-        _self.$confirm(`確定新增課程諮詢教師?`, 'Warning', {
-          confirmButtonText: '確定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          const loading = _self.$loading({
-          lock: true,
-          text: '資料讀取中，請稍後。',
-          spinner: 'el-icon-loading',
-          background: 'rgba(0, 0, 0, 0.7)'
-          });
-
-          _self.$http({
-            url: apiurl,
-            method: 'post',
-            data: formdata,
-            headers:{'SkyGet':_self.$token}
-          })
-            .then((res) => {
-              if (res.data.status == 'Y'){
-                  _self.$message.success('新增成功!!')
-                  _self.$emit('get-insertStatus','')      
-              }else{
-                  _self.$message.error(res.data.message)
-              }
-            })
-            .catch((error) => {
-              _self.$message({
-                message: '系統發生錯誤'+error,
-                type: 'error',
-                duration:0,
-                showClose: true,
-              })
-            })
-            .finally(() => loading.close())
-        }).catch(() => {
-        })            
-      },
       headercellstyle:function(row, column, rowIndex, columnIndex){
          if(row.columnIndex == 1){
           return {cursor:'pointer'}
@@ -163,68 +94,121 @@
               });
             }
           }
-        },           
-        current_change(val) {
-            var _self = this;
-            var start = ''
-            var end = ''
-
-            start = ((val - 1) * _self.pageSize) + 1;
-            end = val * _self.pageSize
-            _self.currentPage = val
-            _self.parameter_clslist.sRowNun = start
-            _self.parameter_clslist.eRowNun = end
-            _self.clsdata = _self.clsdataTemp
-            _self.clsdata = _self.clsdata.filter(function(item, index, array){
-                                                return  item.rowNum >= _self.parameter_clslist.sRowNun && item.rowNum <=_self.parameter_clslist.eRowNun 
-                                              });
-        },          
-        size_change(val) {
+      },           
+      current_change(val) {
           var _self = this;
           var start = ''
           var end = ''
-          start = ((_self.currentPage - 1) * val) + 1;
-          end = _self.currentPage * val
-          _self.pageSize = val
+
+          start = ((val - 1) * _self.pageSize) + 1;
+          end = val * _self.pageSize
+          _self.currentPage = val
           _self.parameter_clslist.sRowNun = start
           _self.parameter_clslist.eRowNun = end
           _self.clsdata = _self.clsdataTemp
           _self.clsdata = _self.clsdata.filter(function(item, index, array){
-                                                return  item.rowNum >= _self.parameter_clslist.sRowNun && item.rowNum <=_self.parameter_clslist.eRowNun 
-                                              });
-        },              
-        getCls:function(){
-          let _self = this
+                                              return  item.rowNum >= _self.parameter_clslist.sRowNun && item.rowNum <=_self.parameter_clslist.eRowNun 
+                                            });
+      },          
+      size_change(val) {
+        var _self = this;
+        var start = ''
+        var end = ''
+        start = ((_self.currentPage - 1) * val) + 1;
+        end = _self.currentPage * val
+        _self.pageSize = val
+        _self.parameter_clslist.sRowNun = start
+        _self.parameter_clslist.eRowNun = end
+        _self.clsdata = _self.clsdataTemp
+        _self.clsdata = _self.clsdata.filter(function(item, index, array){
+                                              return  item.rowNum >= _self.parameter_clslist.sRowNun && item.rowNum <=_self.parameter_clslist.eRowNun 
+                                            });
+      },              
+      getCls:async function(){
+        try {
+              let _self = this
 
-          const apiurl = `${_self.$apiroot}/S04_stucls_page`
-          _self.$http({
-                url:apiurl,
-                method:'get',
-                params:_self.parameter_clslist,
-                headers:{'SkyGet':_self.$token}
-                })
-                .then((res)=>{
-                  if (res.data.status == 'Y') {                 
-                      _self.clsdataTemp = res.data.dataset
-                      _self.clsdata = res.data.dataset 
-                      _self.clsdata.forEach(function(item,index,array){
-                          //item.year_id = 111
-                          //item.sms_id= 1   
-                          item.x_status = false                     
-                      })    
-                      _self.clsdata = res.data.dataset.filter(function(item, index, array){
-                                                              return  item.rowNum >= 1 && item.rowNum <= 10
-                                                            });                                                               
-                      _self.total = res.data.dataset[0].x_total
-                    } else {
-                      _self.clsdata = []
-                    }                                                           
-                  })         
-                .catch((error)=>{
-                          _self.$message.error('呼叫後端【S04_stucls】發生錯誤,'+error)
-                        })
-                .finally()           
-        }
+              const { data, statusText } = await adminAPI.S04_stucls_page.Get(_self.parameter_clslist) 
+
+              if (statusText !== "OK") {
+                throw new Error(statusText);
+              }
+  
+              _self.clsdataTemp = data.dataset
+              _self.clsdata = data.dataset 
+              _self.clsdata.forEach(function(item,index,array){
+                  item.x_status = false                     
+              })    
+
+              _self.clsdata = data.dataset.filter(function(item, index, array){
+                  return  item.rowNum >= 1 && item.rowNum <= 10
+               });      
+                                                      
+              _self.total = data.dataset[0].x_total
+              
+          } catch (error) {
+            
+          }       
+      },
+      add_data:async function(){
+        try {
+              var i = 0;
+              var _self = this;
+              let formdata = new FormData();
+
+              _self.check_list.length = 0;
+
+              this.clsdata.forEach((element, index) => {
+                if(element.x_status == true){
+                  _self.check_list[i++] = element
+                  formdata.append('year_id[]',element.year_id);
+                  formdata.append('sms_id[]',element.sms_id);
+                  formdata.append('deg_id[]',element.deg_id);
+                  formdata.append('dep_id[]',element.dep_id);
+                  formdata.append('bra_id[]',element.bra_id);
+                  formdata.append('grd_id[]',element.grd_id);
+                  formdata.append('cls_id[]',element.cls_id);
+                  formdata.append('emp_id[]',this.getempid);
+                }
+              });
+              formdata.append('token',this.$token);
+              if(this.getempid == '' || this.getempid == null){
+                _self.$message.error('未勾新增課程教師，請確認!!');
+                return false;
+              }  
+
+              if(_self.check_list.length == 0){
+                _self.$message.error('未勾新增課程班級，請確認!!');
+                return false;
+              }     
+
+              const confirm =  await _self.$confirm(`確定新增課程諮詢教師?`, 'Warning', {
+                confirmButtonText: '確定',
+                cancelButtonText: '取消',
+                type: 'warning'
+              }).catch(()=>{})
+
+              if(confirm !== 'confirm')
+              {
+                return  _self.$message.info('已取消新增!!')
+              }
+
+              const { data, statusText } = await adminAPI.consult_setup.Post(formdata) 
+
+              if (statusText !== "OK") {
+                throw new Error(statusText);
+              }
+
+              if (data.status == 'Y'){
+                  _self.$message.success('新增成功!!')
+                  _self.$emit('get-insertStatus','')      
+              }else{
+                  _self.$message.error(data.message)
+              }
+          } catch (error) {
+            
+          }          
+      },      
     },
     components: {
     },

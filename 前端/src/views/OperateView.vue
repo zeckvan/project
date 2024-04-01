@@ -49,6 +49,7 @@
   var apiurl = ''
   import datalistyear from '@/components/pub/DataList_year.vue'  
   import OperateGrade from '@/components/admin/OperateGrade.vue'
+  import * as adminAPI from '@/apis/adminApi.js'
 
   export default {
     name: 'TeaConsultView',
@@ -93,51 +94,28 @@
       handleClick:function(val){
         this.get_data(Number(val.index)+1)
       },
-      get_data: function (page_id) {
-        let _self = this
-        const loading = _self.$loading({
-          lock: true,
-          text: '資料讀取中，請稍後。',
-          spinner: 'el-icon-loading',
-          background: 'rgba(0, 0, 0, 0.7)'
-        });
+      get_data: async function (page_id) {
+        try {
+              let _self = this
 
-        apiurl = _self.api_interface.get_data
-        _self.$http({
-          url: apiurl,
-          method: 'get',
-          headers:{'SkyGet':_self.$token}
-        })
-        .then((res) => {
-          if (res.data.status == 'Y') {
-            _self.tempData = res.data.dataset
-            _self.ParentData = res.data.dataset.filter(function(item,index,array){
-              return item.grade_id == page_id
-            })
-            /*
-            _self.ParentData.forEach(function(item,index,array){
-              item.startdate = new Date(item.startdate)
-              item.enddate = new Date(item.enddate)
-            })*/
-          } else {
-            _self.ParentData = []
-            _self.$message.error('查無資料，請確認')
+              const { data, statusText } = await adminAPI.OperateGrade.Get() 
+
+              if (statusText !== "OK") {
+                throw new Error(statusText);
+              }
+
+              _self.tempData = data.dataset
+              _self.ParentData = data.dataset.filter(function(item,index,array)
+              {
+               return item.grade_id == page_id
+              })
+          } catch (error) {
+            
           }
-        })
-        .catch((error) => {
-            _self.ParentData = []
-            _self.$message({
-              message: '系統發生錯誤'+error,
-              type: 'error',
-              duration:0,
-              showClose: true,
-            })
-          })
-        .finally(() => loading.close())
       },
     },
-    mounted: function () {
-      this.get_data('1')
+    mounted: async function () {
+      await this.get_data('1')
     }
   }
 </script>

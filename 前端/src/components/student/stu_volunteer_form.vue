@@ -168,7 +168,6 @@
                         let formdata = new FormData();
 
                         this.data_structure.header.forEach(function(value, index, array){
-                            console.log(value.col,_self.form[value.col])
                                 formdata.append(value.col,_self.form[value.col]);
                             });
                         formdata.append("token",_self.$token)

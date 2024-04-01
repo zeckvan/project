@@ -54,7 +54,6 @@
             </el-form-item>
         </el-form>   
         <el-button type="primary" @click="save">存檔</el-button>        
-        <el-button type="primary" @click="test">test</el-button>           
     </div>
 </template>
 
@@ -97,7 +96,7 @@
                     background: 'rgba(0, 0, 0, 0.7)'
                     });
 
-            const apiurl = `${this.$apiroot}/studentinfo`    
+            const apiurl = `${this.$apiroot}/studentinfo` 
             _self.$http({
                 url:apiurl,
                 method:'post',
@@ -121,58 +120,6 @@
                 })
                 .finally(()=>loading.close())
         },
-        test:function(){
-            let _self = this
-                    let apiurl = ''
-                    const loading = _self.$loading({
-                                lock: true,
-                                text: '資料處理中，請稍後。',
-                                spinner: 'el-icon-loading',
-                                background: 'rgba(0, 0, 0, 0.7)'
-                                });    
-                    //apiurl = 'http://localhost/zeck/api/filedownload/file/190406;84e809df-be44-4b72-8ae0-b155c6b8fed1'
-                    apiurl = 'http://localhost/learnfile/api/filedownload/file/190406;84e809df-be44-4b72-8ae0-b155c6b8fed1'
-                    //apiurl = `${this.$apiroot}/stufileinfo/filedownload/190406;84e809df-be44-4b72-8ae0-b155c6b8fed1`  
-                    _self.$http({
-                                url:apiurl,
-                                method:'get',
-                                responseType: 'blob',
-                                headers:{'SkyGet':_self.$token}
-                                })
-                                .then((res)=>{
-                                            var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/
-                                            var matches = filenameRegex.exec(decodeURI(res.headers['content-disposition'].split(';')[2]))
-                                            if (matches != null && matches[1]) {                                                 
-                                                var filename = matches[1].replace(/['"]/g, '').replace('UTF-8','')
-                                                _self.download(res,filename)
-                                            }
-                                        })
-                                .catch((error)=>{
-                                        _self.$message.error('檔案下載發生錯誤:'+error)
-                                        })
-                                .finally(()=>loading.close())            
-        },
-                download:function(res,filename){
-                    let _self = this
-                    let context = res.data
-                    let blob = new Blob([context])
-                    if("download" in document.createElement("a")){
-                        if (res.statusText == 'OK' || res.status == '200'){
-                                let link = document.createElement("a")
-                                link.download = filename
-                                link.style.displya = "none"
-                                link.href = URL.createObjectURL(blob)
-                                document.body.appendChild(link)
-                                link.click()
-                                URL.revokeObjectURL(link.href)
-                                document.body.removeChild(link)
-                        }else{
-                            _self.$message.error('檔案下載發生錯誤!!')
-                        }
-                    }else{
-                        navigator.msSaveBold(blob,filename)
-                    }
-                },
         formatDate: function (date) {
             var d = new Date(date),
                             month = '' + (d.getMonth() + 1),
@@ -184,12 +131,60 @@
                         if (day.length < 2) 
                             day = '0' + day;
                 return [year, month, day].join('-')
+        },
+        test:function(){
+            let _self = this
+                    let apiurl = ''
+                    const loading = _self.$loading({
+                                lock: true,
+                                text: '資料處理中，請稍後。',
+                                spinner: 'el-icon-loading',
+                                background: 'rgba(0, 0, 0, 0.7)'
+                                });          
+                    //apiurl = 'http://localhost/filedownload/api/download/190406%3B84e809df-be44-4b72-8ae0-b155c6b8fed1'
+                    apiurl = `${this.$apiroot}/StuFileInfo/filedownload/190406%3B84e809df-be44-4b72-8ae0-b155c6b8fed1`    
+
+                    _self.$http({
+                                url:apiurl,
+                                method:'get',
+                                responseType: 'blob',
+                                headers:{'SkyGet':_self.$token}
+                                })
+                                .then((res)=>{
+
+                                        })
+                                .catch((error)=>{
+                                        _self.$message.error('檔案下載發生錯誤:'+error)
+                                        })
+                                .finally(()=>loading.close())            
+        },
+        download:function(res,val){
+            let _self = this
+            let context = res.data
+            let blob = new Blob([context])
+            let filename = val.row.file_name+'.'+val.row.file_extension
+            if("download" in document.createElement("a")){
+                if (res.statusText == 'OK' || res.status == '200'){
+                        let link = document.createElement("a")
+                        link.download = filename
+                        link.style.displya = "none"
+                        //link.style.displya = "block"
+                        link.href = URL.createObjectURL(blob)
+                        document.body.appendChild(link)
+                        link.click()
+                        URL.revokeObjectURL(link.href)
+                        document.body.removeChild(link)
+                }else{
+                    _self.$message.error('檔案下載發生錯誤!!')
+                }
+            }else{
+                navigator.msSaveBold(blob,filename)
             }
+        },
     },
     mounted: function () {
         let _self = this       
-        const apiurl = `${this.$apiroot}/studentinfo/${_self.$token}`  
-        console.log(apiurl)    
+        const apiurl = `${this.$apiroot}/studentinfo/${_self.$token}`    
         _self.$http({
                 url:apiurl,
                 method:'get',
@@ -212,7 +207,7 @@
                             }
                         })
                 .catch((error)=>{
-                                console.log(error)
+
                     })
                 .finally()
     }

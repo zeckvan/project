@@ -174,7 +174,6 @@
                         _self.form.emp_id = '123'
 
                         this.data_structure.header.forEach(function(value, index, array){
-                          console.log(value.col,_self.form[value.col])
                                 formdata.append(value.col,_self.form[value.col]);
                             });
 
@@ -283,7 +282,6 @@
                         }
                       })
                       .catch((error) => {
-                        console.log(error)
                           _self.tableData = []
                           _self.$message({
                             message: '系統發生錯誤'+error,
@@ -321,7 +319,6 @@
                         headers:{'SkyGet':_self.$token}
                         })
                         .then((res)=>{
-                            console.log(res.data)
                                         if (res.data.status == 'Y'){
                                             this.data_structure.header.forEach(function(value, index, array){
                                                 if(res.data.dataset[0][value.col]){

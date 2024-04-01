@@ -8,6 +8,7 @@
 </template>
   
 <script>
+import * as adminAPI from  '@/apis/adminApi.js' 
 export default {
   name: "yms_year",
   props: {
@@ -32,26 +33,20 @@ export default {
         this.$emit('get-year', val.toString())
       }
   },  
-  mounted() {
+  async mounted() {     
       let _self = this
-      const apiurl = `${_self.$apiroot}/s90yearinfo`
-      _self.$http({
-              url:apiurl,
-              method:'get',
-              headers:{'SkyGet':_self.$token}
-              })
-              .then((res)=>{        
-                    _self.ymslist = res.data.dataset
-                    if(res.data.dataset.length > 0){
-                      _self.year = (this.year_id === "" ? res.data.dataset[0].year_id.toString():this.year_id)
-                      //this.$emit('update:year_id', _self.year );
-                      this.$emit('get-year',_self.year)
-                    }                                        
-                })         
-              .catch((error)=>{
-                       // _self.$message.error('呼叫後端【s90yearinfo】發生錯誤,'+error)
-                      })
-              .finally()                                       
+
+      const { data, statusText } = await adminAPI.s90yearinfo.Get()
+
+      if (statusText !== "OK") {
+          throw new Error(statusText);
+      }
+
+      _self.ymslist = data.dataset
+      if(data.dataset.length > 0){
+        _self.year = (this.year_id === "" ? data.dataset[0].year_id.toString():this.year_id)
+        this.$emit('get-year',_self.year)
+      }                                
   },
   beforeMount(){
 

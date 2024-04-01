@@ -1,7 +1,4 @@
 var apiConfig = 
 {
     "api" : "http://localhost/learnprsservice/api"
-    //"prd" : ""
-    //"qas" : ""
-    //"dev" : "http://localhost/learnprsservice/api"
 }

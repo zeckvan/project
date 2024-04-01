@@ -1,6 +1,4 @@
 var apiConfig = 
 {
     "api" : "http://localhost/learnprsservice/api"
-    //"api" : "https://kcsc.k12ea.gov.tw/learnprsservice/api"
-   //"skytek" : "https://skynew.skytek.com.tw:443/learnprsservice/api"
 }

@@ -75,7 +75,7 @@ export default {
    
   },
   created(){
-    //console.log(yms_year)
+
   },
     components: {
       datalistyear,

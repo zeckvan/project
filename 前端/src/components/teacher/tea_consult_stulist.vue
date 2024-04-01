@@ -437,7 +437,6 @@
           watch:{
             parentData:function(val){
               this.tableData = this.parentData          
-              //console.log(this.total)
             },
             tea_consult:function(){
               this.tag = `諮詢日期:${this.tea_consult.f}

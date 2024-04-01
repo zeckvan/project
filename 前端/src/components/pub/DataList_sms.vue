@@ -8,6 +8,7 @@
 </template>
   
 <script>
+import * as adminAPI from  '@/apis/adminApi.js' 
 export default {
   name: "yms_sms",
   props: {
@@ -38,34 +39,29 @@ export default {
           this.$emit('get-sms',val.toString())
       }
   },
-  mounted() {
-    let _self = this
-      
-      const apiurl = `${_self.$apiroot}/s90smsinfo`
-      _self.$http({
-              url:apiurl,
-              method:'get',
-              headers:{'SkyGet':_self.$token}
-              })
-              .then((res)=>{
-                    if(_self.$props.isShowShort){
-                      _self.smslist = res.data.dataset.filter(function(value) {
-                        return value.sms_id == 1 || value.sms_id == 2;
-                      });
-                    }
-                    else
-                    {
-                      _self.smslist = res.data.dataset
-                    }
-                    if(res.data.dataset.length > 0){
-                      _self.sms = (this.sms_id === "" ? res.data.dataset[0].sms_id.toString():this.sms_id)
-                      this.$emit('get-sms', _self.sms)
-                    }                                        
-                })         
-              .catch((error)=>{
-                        _self.$message.error('呼叫後端【s90smsinfo】發生錯誤,'+error)
-                      })
-              .finally()                  
+  async mounted() {
+      let _self = this
+          
+      const { data, statusText } = await adminAPI.s90smsinfo.Get()
+
+      if (statusText !== "OK") {
+            throw new Error(statusText);
+      }
+
+      if(_self.$props.isShowShort){
+          _self.smslist = data.dataset.filter(function(value) {
+            return value.sms_id == 1 || value.sms_id == 2;
+          });
+      }
+      else
+      {
+        _self.smslist = data.dataset
+      }
+
+      if(data.dataset.length > 0){
+        _self.sms = (this.sms_id === "" ? data.dataset[0].sms_id.toString():this.sms_id)
+        this.$emit('get-sms', _self.sms)
+      }        
   }    
 };
 </script>

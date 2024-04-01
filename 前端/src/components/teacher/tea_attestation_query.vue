@@ -162,7 +162,6 @@ current_change(val) {
           })
           .then((res) => {
               if (res.data.status == 'Y') {
-                console.log(res.data)
                 _self.tableData = res.data.dataset
                 _self.total = res.data.dataset[0].x_total
               } else {
@@ -171,7 +170,6 @@ current_change(val) {
               }
           })
           .catch((error) => {
-              console.log(error)
                 _self.tableData = []
                 _self.$message({
                   message: '系統發生錯誤'+error,

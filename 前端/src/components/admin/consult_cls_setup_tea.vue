@@ -63,6 +63,8 @@
 </template>
 
 <script type="module">
+  import * as adminAPI from '@/apis/adminApi.js'
+
   var apiurl = ''
   export default {
     props: {
@@ -142,51 +144,45 @@
           _self.teadata = _self.teadata.filter(function(item, index, array){
                                                   return  item.rowNum >= _self.parameter_tea.sRowNun && item.rowNum <=_self.parameter_tea.eRowNun
                                                 });        
-      },      
-      size_change_tea(val) {
-        var _self = this;
-        var start = ''
-        var end = ''
-        start = ((_self.currentPage - 1) * val) + 1;
-        end = _self.currentPage * val
-        _self.pageSize = val
-        _self.parameter_tea.sRowNun = start
-        _self.parameter_tea.eRowNun = end
-        _self.teadata = _self.teadataTemp
-        _self.teadata = _self.teadata.filter(function(item, index, array){
-                                                return  item.rowNum >= _self.parameter_tea.sRowNun && item.rowNum <=_self.parameter_tea.eRowNun 
-                                              });
-      },            
-      getEmploee:function(){
-        let _self = this
+        },      
+        size_change_tea(val) {
+          var _self = this;
+          var start = ''
+          var end = ''
+          start = ((_self.currentPage - 1) * val) + 1;
+          end = _self.currentPage * val
+          _self.pageSize = val
+          _self.parameter_tea.sRowNun = start
+          _self.parameter_tea.eRowNun = end
+          _self.teadata = _self.teadataTemp
+          _self.teadata = _self.teadata.filter(function(item, index, array){
+                                                  return  item.rowNum >= _self.parameter_tea.sRowNun && item.rowNum <=_self.parameter_tea.eRowNun 
+                                                });
+        },            
+        getEmploee:async function(){
+          try {
+              let _self = this
 
-        const apiurl = `${_self.$apiroot}/S90_employee`
-        _self.$http({
-              url:apiurl,
-              method:'get',
-              params:_self.parameter_tea,
-              headers:{'SkyGet':_self.$token}
-              })
-              .then((res)=>{
-                if (res.data.status == 'Y') {   
-                    _self.teadataTemp = res.data.dataset
-                    _self.teadata.forEach(function(item,index,array){ 
-                          item.x_status = false                     
-                      })                      
-                    _self.teadata = res.data.dataset.filter(function(item, index, array){
-                                                              return  item.rowNum >= 1 && item.rowNum <= 10
-                                                            });                        
-                    _self.total = res.data.dataset[0].x_total
-                  } else {
-                    _self.teadata = []
-                    //_self.$message.error('查無資料，請確認')
-                  }                                                           
-                })         
-              .catch((error)=>{
-                        _self.$message.error('呼叫後端【S90_employee】發生錯誤,'+error)
-                      })
-              .finally()           
-      },      
+              const { data, statusText } = await adminAPI.S90_employee.Get(_self.parameter_tea) 
+
+              if (statusText !== "OK") {
+                throw new Error(statusText);
+              }
+
+              _self.teadataTemp = data.dataset
+              _self.teadata.forEach(function(item,index,array)
+              { 
+                    item.x_status = false                     
+              })                      
+              _self.teadata = data.dataset.filter(function(item, index, array)
+              {
+                return  item.rowNum >= 1 && item.rowNum <= 10
+              });                        
+              _self.total = data.dataset[0].x_total
+          } catch (error) {
+            
+          } 
+        },      
     },
     components: {
     },

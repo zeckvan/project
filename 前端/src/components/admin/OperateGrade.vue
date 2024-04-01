@@ -53,8 +53,8 @@
   <script type="module">
     var apiurl = ''
     import * as data_structure from '@/js/pub_grid_structure.js'
+    import * as adminAPI from '@/apis/adminApi.js'
 
-    
     export default {
       props: {
         userStatic: {
@@ -86,53 +86,6 @@
         }
       },
       methods: {
-        save:function(){
-          let _self = this
-          let sdate
-          let edate
-          let formdata = new FormData();
-          _self.tableData.forEach(function(value, index, array){ 
-            formdata.append('year_id[]',Number(value.year_id))
-            formdata.append('sms_id[]',Number(value.sms_id))
-            formdata.append('grade_id[]',value.grade_id)
-            formdata.append('type_id[]',value.type_id) 
-            formdata.append('startdate[]',value.startdate.replaceAll('-','').replaceAll(':','').replaceAll(' ','')) 
-            formdata.append('enddate[]',value.enddate.replaceAll('-','').replaceAll(':','').replaceAll(' ','')) 
-          });
- 
-          formdata.append('token',_self.$token)
-          const loading = _self.$loading({
-            lock: true,
-            text: '資料讀取中，請稍後。',
-            spinner: 'el-icon-loading',
-            background: 'rgba(0, 0, 0, 0.7)'
-          });
-
-          apiurl = _self.api_interface.save_data
-
-          _self.$http({
-            url: apiurl,
-            method:"put",
-            data:formdata,
-            headers:{'SkyGet':_self.$token}
-          })
-            .then((res) => {  
-              if (res.data.status == 'Y'){
-                  _self.$message.success('存檔成功!!')
-              }else{
-                  _self.$message.error(res.data.message)
-              }
-            })
-            .catch((error) => {
-                _self.$message({
-                  message: '系統發生錯誤'+error,
-                  type: 'error',
-                  duration:0,
-                  showClose: true,
-                })
-              })
-            .finally(() => loading.close())      
-        },
         headercellstyle:function(row, column, rowIndex, columnIndex){
           return {
             "text-align": 'center',
@@ -171,7 +124,21 @@
         size_change_std:function(){
 
         },        
-        get_data:function(){
+        get_data:async function(){
+          try {
+              let _self = this
+
+              const { data, statusText } = await adminAPI.OperateGrade.Get() 
+
+              if (statusText !== "OK") {
+                throw new Error(statusText);
+              }
+
+              _self.tableData = data.dataset 
+          } catch (error) {
+            
+          } 
+          /**
           let _self = this
           const loading = _self.$loading({
           lock: true,
@@ -204,15 +171,45 @@
               })
             })
           .finally(() => loading.close())        
-        },                 
+           */
+        },        
+        save:async function(){
+          try {
+            let _self = this
+            let formdata = new FormData();
+            _self.tableData.forEach(function(value, index, array){ 
+              formdata.append('year_id[]',Number(value.year_id))
+              formdata.append('sms_id[]',Number(value.sms_id))
+              formdata.append('grade_id[]',value.grade_id)
+              formdata.append('type_id[]',value.type_id) 
+              formdata.append('startdate[]',value.startdate.replaceAll('-','').replaceAll(':','').replaceAll(' ','')) 
+              formdata.append('enddate[]',value.enddate.replaceAll('-','').replaceAll(':','').replaceAll(' ','')) 
+            });
+ 
+          formdata.append('token',_self.$token)
+
+              const { data, statusText } = await adminAPI.OperateGrade.Update(formdata) 
+
+              if (statusText !== "OK") {
+                throw new Error(statusText);
+              }
+
+              if (data.status == 'Y'){
+                _self.$message.success('存檔成功!!')
+              }else{
+                _self.$message.error(res.data.message)
+              }
+          } catch (error) {
+            
+          } 
+        },
       },
       components: {
 
       },
       beforeDestroy(){
       },
-      mounted() {
-    
+      mounted() {    
         //this.get_data()
       },
       beforeMount() {
@@ -243,8 +240,7 @@
   <style>
     .el-input--small .el-input__inner {
         height: 32px;
-        line-height: 32px;
-        
+        line-height: 32px;        
     }
   </style>
   

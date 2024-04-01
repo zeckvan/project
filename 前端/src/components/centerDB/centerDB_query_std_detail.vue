@@ -115,7 +115,7 @@ export default {
           dataTable.push(data)
         }
       })
-      // console.log(dataTable)
+
       return dataTable
     },
   }

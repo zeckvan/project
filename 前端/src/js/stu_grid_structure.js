@@ -1,3 +1,5 @@
+import * as adminAPI from  '@/apis/adminApi.js' 
+
 //幹部經歷
 const stu_cadre =
 {
@@ -7,13 +9,14 @@ const stu_cadre =
         {label:'學號',width:'',prop:'b',col:'std_no',parameter:'Y',hidden:'Y',sort:0,defult:''},
         {label:'年度',width:'50',prop:'c',col:'year_id',parameter:'Y',hidden:'N',sort:1,defult:''},
         {label:'學期',width:'50',prop:'d',col:'sms_id',parameter:'Y',hidden:'N',sort:2,defult:''},
-        {label:'單位名稱',width:'',prop:'e',col:'unit_name',parameter:'Y',hidden:'N',sort:3,defult:''},
+        {label:'單位名稱',width:'',prop:'e',col:'unit_name',parameter:'N',hidden:'N',sort:3,defult:''},
         {label:'開始日期',width:'',prop:'f',col:'startdate',parameter:'N',hidden:'N',sort:5,defult:''},
         {label:'結束日期',width:'',prop:'g',col:'enddate',parameter:'N',hidden:'N',sort:6,defult:''},
-        {label:'擔任職務',width:'',prop:'h',col:'position_name',parameter:'Y',hidden:'Y',sort:0,defult:''},
+        {label:'擔任職務',width:'',prop:'h',col:'position_name',parameter:'N',hidden:'Y',sort:0,defult:''},
         {label:'幹部等級',width:'',prop:'i',col:'type_id',parameter:'N',hidden:'N',sort:4,defult:''},
         {label:'資料來源',width:'',prop:'j',col:'is_sys',parameter:'N',hidden:'Y',sort:0,defult:''},
-        {label:'多元學習成果勾選確認',width:'',prop:'zz',col:'check_centraldb',parameter:'N',hidden:'Y',sort:0,defult:'',slot:true},         
+        {label:'多元學習成果勾選確認',width:'',prop:'zz',col:'check_centraldb',parameter:'N',hidden:'Y',sort:0,defult:'',slot:true}, 
+        {label:'序號',width:'',prop:'k',col:'ser_id',parameter:'Y',hidden:'Y',sort:0,defult:''},      
     ],
     delete_rule:
     {
@@ -552,39 +555,44 @@ const stu_turn_export =
     centraldb_batch:false,
 }
 
-function getOpenOpYN(vue,apiurl,parameter,token){
+async function getOpenOpYN(vue,apiurl,parameter,token){
   let _self = this
   let open_yn ='N'
   let obj={open_yn:'',startdate:'',enddate:''}
   let start = ''
   let end = ''
-  vue.$http({
-    url: apiurl,
-    method: 'get',
-    params: parameter,
-    headers:{'SkyGet':token}
-  })
-  .then((res) => {  
-    if (res.data.dataset.open_yn == 'Y') {       
-        obj.open_yn ='Y'
-    } else {
-      start = res.data.dataset.startdate
-      end = res.data.dataset.enddate          
-      obj.open_yn ='N'
-      obj.startdate = start.substr(0,4)+'/'+start.substr(4,2)+'/'+start.substr(6,2)+' '+start.substr(8,2)+':'+start.substr(10,2)+':'+start.substr(12,2)
-      obj.enddate = end.substr(0,4)+'/'+end.substr(4,2)+'/'+end.substr(6,2)+' '+end.substr(8,2)+':'+end.substr(10,2)+':'+end.substr(12,2)
-    }
-  })
-  .catch((error) => {
-      vue.$message({
-        message: '系統發生錯誤'+error,
-        type: 'error',
-        duration:0,
-        showClose: true,
-      })
-    })
-  .finally()  
-  
+
+  try {
+      const { data, statusText } = await adminAPI.get_OpOpenYN.Get(parameter) 
+
+      if (statusText !== "OK") {
+        throw new Error(statusText);
+      }
+      if (data.dataset.open_yn == 'Y') {       
+          start = data.dataset.startdate
+          end = data.dataset.enddate   
+          obj.open_yn ='Y'
+          obj.startdate = start.substr(0,4)+'/'+start.substr(4,2)+'/'+start.substr(6,2)+' '+start.substr(8,2)+':'+start.substr(10,2)+':'+start.substr(12,2)
+          obj.enddate = end.substr(0,4)+'/'+end.substr(4,2)+'/'+end.substr(6,2)+' '+end.substr(8,2)+':'+end.substr(10,2)+':'+end.substr(12,2)
+      } else {      
+        start = data.dataset.startdate
+        end = data.dataset.enddate   
+        if(!start && typeof(start) !== 'undefined' && start != 0)
+        {
+          obj.open_yn ='N'
+          obj.startdate = ''
+          obj.enddate = ''
+        }
+        else{       
+          obj.open_yn ='N'
+          obj.startdate = start.substr(0,4)+'/'+start.substr(4,2)+'/'+start.substr(6,2)+' '+start.substr(8,2)+':'+start.substr(10,2)+':'+start.substr(12,2)
+          obj.enddate = end.substr(0,4)+'/'+end.substr(4,2)+'/'+end.substr(6,2)+' '+end.substr(8,2)+':'+end.substr(10,2)+':'+end.substr(12,2)
+        }
+      }    
+  } catch (error) {
+    
+  }
+
   return obj
 }
 

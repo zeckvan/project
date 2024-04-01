@@ -95,6 +95,7 @@
 <script type="module">
     import datalistyear from '@/components/pub/DataList_year.vue'
     import datalistsms from '@/components/pub/DataList_sms.vue'
+    import * as stuAPI from  '@/apis/stuApi.js' 
 
     export default {
             props: {
@@ -197,10 +198,10 @@
                     cancel:function(){
                         this.dialogFormVisible = false
                     },
-                    save:function(){
+                    save:async function(){
                         let _self = this
                         let formdata = new FormData();
-
+                        let valid_pass = 'N'
 
                         this.data_structure.header.forEach(function(value, index, array){
                                 formdata.append(value.col,_self.form[value.col]);
@@ -209,43 +210,28 @@
 
                         _self.$refs["ruleForm"].validate((valid) => {
                             if (valid) {
-                                const loading = _self.$loading({
-                                        lock: true,
-                                        text: '資料讀取中，請稍後。',
-                                        spinner: 'el-icon-loading',
-                                        background: 'rgba(0, 0, 0, 0.7)'
-                                        });
-
-                                const apiurl = _self.api_interface.save_form
-                                _self.$http({
-                                    //'Content-Type': 'multipart/form-data',
-                                    url:apiurl,
-                                    method:_self.method_type,
-                                    data:formdata,
-                                    headers:{'SkyGet':_self.$token}
-                                    })
-                                    .then((res)=>{
-                                                    if (res.data.status == 'Y'){
-                                                        _self.$message.success('存檔成功!!')
-                                                    }else{
-                                                        _self.$message.error(res.data.message)
-                                                    }
-                                            })
-                                    .catch((error) => {
-                                        _self.$message({
-                                        message: '存檔失敗:'+error,
-                                        type: 'error',
-                                        duration:0,
-                                        showClose: true,
-                                        })
-                                    })
-                                    .finally(()=>loading.close())
-                                this.dialogFormVisible = false
+                                valid_pass = 'Y'
                             }
                             else{
                                 return false
                             }
                         })
+
+                        if(valid_pass == 'Y')
+                        {
+                            const { data, statusText } = await stuAPI.StuCompetition.Put(formdata) 
+
+                            if (statusText !== "OK") {
+                                throw new Error(statusText);
+                            }        
+
+                            if (data.status == 'Y'){                                  
+                                _self.$message.success('存檔成功!!')
+                            }else{
+                                _self.$message.error(data.message)
+                            }     
+                            this.dialogFormVisible = false
+                        }
                     },
                     close:function() {
                         this.$emit('get-show', false)
@@ -257,7 +243,7 @@
                          this.form.sms_id = val
                     }
             },
-            mounted() {
+            async mounted() {
                 let _self = this
                 if(this.formSaveCheck == 'studiversecheck'){
                     this.SaveButtonVisible = true
@@ -272,47 +258,29 @@
                                           });
                     this.form.is_sys = "2"
                 }else{
-                    const loading = _self.$loading({
-                                    lock: true,
-                                    text: '資料讀取中，請稍後。',
-                                    spinner: 'el-icon-loading',
-                                    background: 'rgba(0, 0, 0, 0.7)'
-                                    });
+                        const { data, statusText } = await stuAPI.StuCompetition.Get(_self.parameter) 
 
-                    const apiurl = _self.api_interface.get_form
-                    _self.$http({
-                        url:apiurl,
-                        method:'get',
-                        params:this.parameter,
-                        headers:{'SkyGet':_self.$token}
-                        })
-                        .then((res)=>{
-                                        if (res.data.status == 'Y'){
-                                            this.data_structure.header.forEach(function(value, index, array){
-                                                if(res.data.dataset[0][value.col]){
-                                                    if(value.col == "year_id" || value.col == "sms_id"){
-                                                        _self.form[value.col] = res.data.dataset[0][value.col].toString()
-                                                    }else if(value.col == "startdate" || value.col == "enddate"){
-                                                        _self.form[value.col] = res.data.dataset[0][value.col] == "undefined" ? "":res.data.dataset[0][value.col]
-                                                    }else{
-                                                        _self.form[value.col] = res.data.dataset[0][value.col]
-                                                    }
-                                                }
-                                            })
-                                            _self.is_readonly = (res.data.dataset[0].is_sys === "1"? true : false)
-                                        }else{
-                                            _self.$message.error('查無資料，請確認')
-                                        }
-                                })
-                        .catch((error) => {
-                            _self.$message({
-                            message: '系統發生錯誤'+error,
-                            type: 'error',
-                            duration:0,
-                            showClose: true,
+                        if (statusText !== "OK") {
+                            throw new Error(statusText);
+                        }
+
+                        if (data.status == 'Y'){
+                            this.data_structure.header.forEach(function(value, index, array){
+                                if(data.dataset[0][value.col]){
+                                    if(value.col == "year_id" || value.col == "sms_id"){
+                                        _self.form[value.col] = data.dataset[0][value.col].toString()
+                                    }else if(value.col == "startdate" || value.col == "enddate"){
+                                        _self.form[value.col] = data.dataset[0][value.col] == "undefined" ? "":data.dataset[0][value.col]
+                                    }else{
+                                        _self.form[value.col] = data.dataset[0][value.col]
+                                    }
+                                }
                             })
-                        })
-                        .finally(()=>loading.close())
+                            _self.is_readonly = (data.dataset[0].is_sys === "1"? true : false)
+                        }else{
+                            _self.$message.error('查無資料，請確認')
+                        }
+
                         this.method_type = "put"
                     }
             },

@@ -86,7 +86,7 @@
                               consult_emp:"",
                               kind:this.userStatic.interface,
                               sRowNun:1,
-                              eRowNun:10,token:this.$token},
+                              eRowNun:10,token:this.$token,arg_std:''},
                       yearlist:[],
                       smslist:[],
                       clslist:[],
@@ -109,8 +109,8 @@
     },
     methods: {
       getstd:function(val){
-        this.queryform.std_no = val
-        this.page2Lable = `學習成果及多元表現概況明細(學號：${val})`
+        this.queryform.arg_std = val
+        this.page2Lable = `學習成果概況明細(學號：${val})`
       },
       yearChange:function(val){
           this.clsParms.year_id = val     
@@ -121,6 +121,7 @@
           //this.getclslist(this.clsParms)
       },
       query:function(){     
+        this.page2Lable = `多元表現概況明細`
         this.get_data()
       },   
       get_data:function(){
@@ -146,6 +147,8 @@
           } else {
             _self.tableData = []
             _self.$message.error('查無資料，請確認')
+            _self.queryform.arg_std = ''
+            _self.page2Lable = `多元表現概況明細(學號：)`
           }
         })
         .catch((error) => {

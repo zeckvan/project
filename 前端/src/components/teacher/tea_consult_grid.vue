@@ -315,7 +315,6 @@ export default {
           }
         })
         .catch((error) => {
-          console.log(error)
             _self.tableData = []
             _self.$message({
               message: '系統發生錯誤'+error,

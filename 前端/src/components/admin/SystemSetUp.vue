@@ -36,7 +36,7 @@
   <script type="module">
     var apiurl = ''
     import * as data_structure from '@/js/pub_grid_structure.js'
-
+    import * as adminAPI from '@/apis/adminApi.js'
     
     export default {
       props: {
@@ -60,49 +60,6 @@
         }
       },
       methods: {
-        save:function(){
-          let _self = this
-          let formdata = new FormData();
-
-          _self.tableData.forEach(function(value, index, array){
-            formdata.append('Name[]',value.name)
-            formdata.append('Value[]',value.value)
-            formdata.append('Unit[]',value.unit)
-            formdata.append('Memo[]',value.memo) 
-          });
-          formdata.append('token',_self.$token) 
-          const loading = _self.$loading({
-          lock: true,
-          text: '資料讀取中，請稍後。',
-          spinner: 'el-icon-loading',
-          background: 'rgba(0, 0, 0, 0.7)'
-        });
-        apiurl = _self.api_interface.save_data
-
-        _self.$http({
-          url: apiurl,
-          method:"put",
-          data:formdata,
-          headers:{'SkyGet':_self.$token}
-        })
-          .then((res) => {  
-            if (res.data.status == 'Y'){
-                _self.$message.success('存檔成功!!')
-            }else{
-                _self.$message.error(res.data.message)
-            }
-          })
-          .catch((error) => {
-              _self.tableData = []
-              _self.$message({
-                message: '系統發生錯誤'+error,
-                type: 'error',
-                duration:0,
-                showClose: true,
-              })
-            })
-          .finally(() => loading.close())    
-        },
         headercellstyle:function(row, column, rowIndex, columnIndex){
           return {
             "text-align": 'center',
@@ -141,40 +98,49 @@
         size_change_std:function(){
 
         },        
-        get_data:function(){
-          let _self = this
-          const loading = _self.$loading({
-          lock: true,
-          text: '資料讀取中，請稍後。',
-          spinner: 'el-icon-loading',
-          background: 'rgba(0, 0, 0, 0.7)'
-        });
-        apiurl = _self.api_interface.get_data
+        save:async function(){
+          try {
+              let _self = this
+              let formdata = new FormData();
 
-        _self.$http({
-          url: apiurl,
-          method: 'get',
-          headers:{'SkyGet':_self.$token}
-        })
-          .then((res) => {  
-            console.log(res)
-            if (res.data.status == 'Y') {   
-              _self.tableData = res.data.dataset   
-            } else {
-              _self.studata = []
-              _self.$message.error('查無資料，請確認')
-            }
-          })
-          .catch((error) => {
-              _self.tableData = []
-              _self.$message({
-                message: '系統發生錯誤'+error,
-                type: 'error',
-                duration:0,
-                showClose: true,
-              })
-            })
-          .finally(() => loading.close())        
+              _self.tableData.forEach(function(value, index, array)
+              {
+                formdata.append('Name[]',value.name)
+                formdata.append('Value[]',value.value)
+                formdata.append('Unit[]',value.unit)
+                formdata.append('Memo[]',value.memo) 
+              });
+
+              formdata.append('token',_self.$token) 
+
+              const { data, statusText } = await adminAPI.SystemSetup.Update(formdata) 
+
+              if (statusText !== "OK") {
+                throw new Error(statusText);
+              }
+
+              if (data.status == 'Y'){
+                _self.$message.success('存檔成功!!')
+              }else{
+                _self.$message.error(res.data.message)
+              }
+          } catch (error) {
+            
+          } 
+        },
+        get_data:async function(){
+          try {
+              let _self = this
+              const { data, statusText } = await adminAPI.SystemSetup.Get() 
+
+              if (statusText !== "OK") {
+                throw new Error(statusText);
+              }
+
+              _self.tableData = data.dataset 
+          } catch (error) {
+            
+          }      
         },                 
       },
       components: {
@@ -213,4 +179,4 @@
   <style>
 
   </style>
-  
+  @/apis/adminApi.js
